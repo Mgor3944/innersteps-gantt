@@ -1,0 +1,45 @@
+/* test stand-in for the Supabase library */
+(() => {
+  const today = new Date().toISOString().slice(0,10), plus = n => new Date(Date.now()+n*864e5).toISOString().slice(0,10);
+  const rows = [
+    {collection:"categories", id:"c01", data:{name:"Story Pipeline", color:"violet", order:1, subs:[{id:"sep1", name:"Episode 1"}]}},
+    {collection:"categories", id:"c14", data:{name:"Marketing", color:"pink", order:2}},
+    {collection:"tasks", id:"t1", data:{cat:"c01", sub:"sep1", name:"E1 script", start:plus(-2), end:plus(3), status:"todo", owners:["Anna"], order:1}},
+    {collection:"tasks", id:"t2", data:{cat:"c01", name:"E1 art", start:plus(4), end:plus(9), status:"todo", owners:["Dipesh"], deps:["t1"], order:2}},
+    {collection:"tasks", id:"t3", data:{cat:"c14", name:"Launch email", start:plus(1), end:plus(2), status:"doing", owners:["Jesse"], order:1}},
+    {collection:"away", id:"a1", data:{person:"Anna", start:plus(1), end:plus(2), note:"Holiday"}},
+    {collection:"settings", id:"plan", data:{launch:plus(40), title:"S2"}},
+    {collection:"notes", id:"summary", data:{text:"Hello", updated:1}},
+    {collection:"changelog", id:"log28", data:{at:1, date:today, text:"x"}}
+  ];
+  window.__rows = rows; window.__writes = []; window.__session = null; window.__member = true; window.__delay = 30;
+  const wait = v => new Promise(r => setTimeout(() => r(v), window.__delay));
+  function from(table){
+    const q = {op:"select", f:{}};
+    const b = {
+      select(){ return b; }, eq(k, v){ q.f[k] = v; return b; },
+      upsert(row){ q.op = "upsert"; q.row = row; return b; }, delete(){ q.op = "delete"; return b; },
+      maybeSingle(){ q.single = true; return b; },
+      then(res, rej){ return wait().then(() => {
+        if (table === "people") return {data: window.__session && window.__member ? {id:"jesse", name:"Jesse"} : null, error:null};
+        if (!window.__session || !window.__member) return q.op === "select" ? {data:[], error:null} : {data:null, error:{code:"42501", message:"new row violates row-level security policy"}};
+        if (q.op === "select") return {data: rows.map(r => ({...r})), error:null};
+        window.__writes.push(q.op === "upsert" ? {op:"upsert", ...q.row} : {op:"delete", ...q.f});
+        if (q.op === "upsert"){ const i = rows.findIndex(r => r.collection === q.row.collection && r.id === q.row.id); const r = {collection:q.row.collection, id:q.row.id, data:q.row.data}; if (i < 0) rows.push(r); else rows[i] = r; window.__emit && setTimeout(() => window.__emit({eventType: i < 0 ? "INSERT" : "UPDATE", new:{...q.row}}), 40); }
+        else { const i = rows.findIndex(r => r.collection === q.f.collection && r.id === q.f.id); if (i >= 0) rows.splice(i, 1); window.__emit && setTimeout(() => window.__emit({eventType:"DELETE", old:{collection:q.f.collection, id:q.f.id}}), 40); }
+        return {data:null, error:null};
+      }).then(res, rej); }
+    };
+    return b;
+  }
+  window.supabase = { createClient: () => ({
+    auth: {
+      async signInWithPassword({email, password}){ if (email === "jesse@gantt.innersteps.org" && password === "a".repeat(32)){ window.__session = {user:{id:"u1"}}; return {error:null}; } return {error:{message:"Invalid login credentials"}}; },
+      async getSession(){ return {data:{session: window.__session}}; },
+      async signOut(){ window.__session = null; return {}; },
+      onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; }
+    },
+    from,
+    channel(){ const c = { on(_t, _f, cb){ window.__emit = cb; return c; }, subscribe(cb){ setTimeout(() => cb("SUBSCRIBED"), 10); return c; } }; return c; }
+  }) };
+})();

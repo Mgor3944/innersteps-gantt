@@ -1,0 +1,2915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Series 2 Launch Plan - Gantt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0,0&display=block" rel="stylesheet">
+<style>
+:root{
+  /* layout: sticky task list on the left, day-scaled timeline on the right, editor drawer slides in from the right */
+  /* palette: warm off-white page, white cards, deep navy as the accent; lime only on navy surfaces */
+  --bg:#F7F7F5; --surface:#FFFFFF; --raised:#1D1C2A; --ink:#1D1C2A; --ink-soft:#49484D; --muted:#85858A; --line:#ECECEA;
+  --accent:#1D1C2A; --accent-ink:#F7F7F5; --accent-soft:#EDECF3; --lime:#D3F27A;
+  --launch:#FF8A3D; --late:#E5484D; --late-soft:#FFE0DE; --late-ink:#9B1C20;
+  --weekend:#F7F7F4; --hover:#F3F3F0; --shadow:0 12px 32px rgba(29,28,42,.13);
+  --font-display:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --label-w:310px; --row-h:40px; --cat-h:46px; --add-h:40px; --bar-h:26px; --head-h:58px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;font-weight:500;display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+b,strong{font-weight:700}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.ms{font-family:"Material Symbols Rounded";font-weight:500;font-style:normal;font-size:20px;line-height:1;display:inline-block;letter-spacing:normal;text-transform:none;white-space:nowrap;direction:ltr;-webkit-font-smoothing:antialiased;font-feature-settings:"liga";user-select:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.disp{font-family:var(--font-display);font-weight:700}
+
+/* header */
+.top{display:flex;align-items:center;gap:10px 14px;padding:14px 20px 12px;flex-wrap:wrap}
+.top h1{font-family:var(--font-display);font-weight:800;font-size:24px;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;white-space:nowrap}
+.chip .ms{font-size:18px}
+.chip.launch .ms{color:var(--launch)}
+.chip.launch input{border:0;background:none;color:var(--ink);width:auto;padding:0 24px 0 0;font-size:13px;font-weight:600;position:relative;cursor:pointer}
+.datewrap{position:relative;display:inline-flex;align-items:center}
+.chip.launch input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:auto;height:auto;margin:0;padding:0;opacity:0;cursor:pointer}
+.chip.launch .calic{position:absolute;right:0;font-size:18px;color:var(--ink);pointer-events:none}
+.chip.bad{background:var(--late-soft);color:var(--late-ink);border-color:transparent}
+.chip.soft{color:var(--muted)}
+/* one top bar: title and status chips on the left, tools pinned right; it wraps to a second line on narrow screens */
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-left:auto}
+.btn.sq{width:36px;padding:0;justify-content:center}
+.btn .ms{font-size:20px}
+.menuwrap{position:relative}
+.menuwrap.open>.btn{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.menu{position:absolute;left:0;top:calc(100% + 8px);z-index:40;min-width:170px;display:flex;flex-direction:column;gap:2px;padding:6px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;transform:translateY(-6px);pointer-events:none;visibility:hidden;transition:opacity .15s ease,transform .18s ease,visibility 0s .18s}
+.menu.right{left:auto;right:0}
+.menuwrap.open .menu{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .15s ease,transform .18s ease}
+.menu button{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border-radius:9px;font-size:13.5px;font-weight:600;white-space:nowrap;color:var(--ink);text-align:left}
+.menu button:hover{background:var(--hover)}
+.menu button.on{background:var(--accent-soft)}
+.menu button .ms{font-size:18px;color:var(--muted)}
+.msep{height:1px;background:var(--line);margin:3px 4px}
+button.chip.bad{cursor:pointer;font-weight:600}
+button.chip.bad:hover{filter:brightness(.97)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg{border-radius:14px}
+.seg button{height:30px;padding:0 14px;border-radius:9px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.btn{height:36px;padding:0 14px;border-radius:12px;display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.test.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.spacer{flex:1}
+/* legend: a popup opened from the Legend button */
+.legwrap{position:relative}
+.legwrap.open>.btn{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.legend{position:absolute;right:0;top:calc(100% + 8px);z-index:40;display:flex;flex-direction:column;gap:10px;align-items:flex-start;min-width:230px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);color:var(--ink);font-size:13px;white-space:nowrap;opacity:0;transform:translateY(-6px);pointer-events:none;visibility:hidden;transition:opacity .15s ease,transform .18s ease,visibility 0s .18s}
+.legwrap.open .legend{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .15s ease,transform .18s ease}
+.legend span>i{flex:none}
+.legend span:has(.sw.today)>i,.legend span:has(.sw.launch)>i,.legend span:has(i.sw.ms)>i{margin:0 9.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:12px;border-radius:5px;display:inline-block}
+.sw.late{background:var(--late-soft);border:2px solid var(--late)}
+.sw.blocked{background:transparent;border:2px dashed var(--late)}
+.sw.doing{background:#CFE5FF;box-shadow:inset 0 0 0 2px #2F6FB5}
+.sw.done{background:#86C1FF;opacity:.45}
+.sw.today{width:3px;height:16px;border-radius:2px;background:var(--accent)}
+.sw.launch{width:3px;height:16px;border-radius:2px;background:var(--launch)}
+.teststrip{display:none;margin:0 12px 8px;padding:10px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent);align-items:center;gap:10px;font-size:13.5px;font-weight:600}
+.teststrip .ms{font-size:22px}
+.testing .teststrip{display:flex}
+.testing .board{border:2px dashed var(--accent)}
+
+/* board */
+.board{flex:1;overflow:auto;margin:0 12px 12px;background:var(--surface);border:1px solid var(--line);border-radius:20px;position:relative}
+.grid{position:relative;min-height:100%;
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--day)*5),var(--weekend) calc(var(--day)*5) calc(var(--day)*7));
+  background-position:calc(var(--label-w) - var(--off,0) * var(--day)) 0;background-repeat:repeat}
+.grid.month{background-image:repeating-linear-gradient(90deg,transparent 0 calc(var(--day)*7 - 1px),var(--line) calc(var(--day)*7 - 1px) calc(var(--day)*7))}
+.row{display:flex;position:relative}
+.label{position:sticky;left:0;z-index:3;width:var(--label-w);flex:none;background:var(--surface);border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 10px 0 12px}
+.track{position:relative;flex:none;border-bottom:1px solid var(--line)}
+.head{position:sticky;top:0;z-index:6;height:var(--head-h)}
+.head .label{z-index:7;border-bottom:1px solid var(--line);font-family:var(--font-display);font-weight:700;color:var(--muted);font-size:13px}
+.head .track{background:var(--surface);height:100%}
+.m{position:absolute;top:0;height:26px;border-left:1px solid var(--line);display:flex;align-items:center;font-family:var(--font-display);font-weight:700;font-size:13px;white-space:nowrap}
+.m span{position:sticky;left:calc(var(--label-w) + 10px);padding:0 10px}
+.d,.wk{position:absolute;top:26px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);line-height:1.1;font-family:var(--font-display);font-weight:700}
+.d b{font-size:10px;opacity:.75;font-weight:500}
+.d span{font-size:12px;color:var(--ink)}
+.d.we span{color:var(--muted)}
+.d.today span{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:1px 5px}
+.wk{align-items:flex-start;padding-left:4px;border-left:1px solid var(--line);color:var(--ink);font-size:11px}
+.vline{position:absolute;top:var(--head-h);bottom:0;width:2px;z-index:1;pointer-events:none;border-radius:2px}
+.vline.today{background:var(--accent)}
+.vline.launch{background:var(--launch)}
+.vtag{position:absolute;top:30px;transform:translateX(-50%);z-index:2;font-family:var(--font-display);font-weight:700;font-size:11px;padding:2px 8px;border-radius:999px;white-space:nowrap;display:inline-flex;gap:4px;align-items:center;pointer-events:none}
+.vtag .ms{font-size:14px}
+.vtag.today{background:var(--accent);color:var(--accent-ink)}
+.vtag.launch{background:var(--launch);color:#fff}
+.vtag.ms{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.vtag.compact{padding:2px 4px;pointer-events:auto}
+.vline.ms{background:repeating-linear-gradient(to bottom,var(--accent) 0 6px,transparent 6px 11px);opacity:.5}
+.vtag.alt{top:2px}
+.grid.week .vtag.alt{top:30px}
+.grid.week .vtag.ms{top:2px}
+.sw.ms{width:0;height:16px;border-left:2px dashed var(--accent);border-radius:0;opacity:.6}
+.chip.launch{cursor:pointer;font-weight:600}
+.chip.launch:hover{background:var(--hover)}
+.chip.launch b{font-weight:700}
+.chip.launch .calic2{font-size:16px;color:var(--muted);margin-left:2px}
+.modal.msmodal{width:min(660px,100%)}
+.mslist{display:flex;flex-direction:column;gap:8px}
+.msrow{display:grid;grid-template-columns:22px 1.2fr 150px 1.3fr 54px;gap:8px;align-items:center}
+.msrow .icon-btn{opacity:1}
+.msmain{font-size:11px;font-weight:700;color:var(--muted);text-align:center}
+@media (max-width:640px){.msrow{grid-template-columns:22px 1fr 1fr;}.msrow .mscope{grid-column:2 / 4}}
+.grid.week .vtag.today{display:none}
+.grid.week .vtag.launch{top:2px}
+
+/* category rows */
+.cat .label{height:var(--cat-h);gap:8px;border-bottom:1px solid var(--line)}
+.cat .track{height:var(--cat-h)}
+.icon-btn{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--hover);color:var(--ink)}
+.icon-btn .ms{font-size:20px;transition:transform .15s}
+.collapsed .tog .ms{transform:rotate(-90deg)}
+.cat-dot{width:14px;height:14px;border-radius:5px;flex:none}
+.cat-name{font-family:var(--font-display);font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;text-align:left}
+.count{font-family:var(--font-display);font-weight:700;font-size:11px;color:var(--muted);background:var(--hover);border-radius:999px;padding:1px 6px;flex:none;min-width:26px;text-align:center}
+.acts{display:flex;flex:none}
+.cat .acts{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--surface);border-radius:10px;box-shadow:-10px 0 10px var(--surface);opacity:0;transition:opacity .12s}
+.row.cat:hover .acts,.row.cat:focus-within .acts{opacity:1}
+.row.cat .acts .icon-btn{opacity:1}
+@media (hover:none){.cat .acts{opacity:1}}
+.sum{position:absolute;top:calc(var(--cat-h) / 2 - 4px);height:8px;border-radius:99px;opacity:.55}
+
+/* task rows */
+.task .label{height:var(--row-h);padding-left:30px}
+.task .track{height:var(--row-h)}
+.addrow .label,.addrow .track{height:var(--add-h)}
+/* compact rows: the plan favours seeing how tasks flow over extra spacing */
+body.compact{--row-h:28px;--cat-h:36px;--add-h:26px;--bar-h:20px}
+.compact .bar{border-radius:7px;font-size:11.5px;padding:0 8px}
+.compact .bar .bi{font-size:14px}
+.compact .ghost{border-radius:7px}
+.compact .unsched-hint{border-radius:7px;font-size:11.5px}
+.compact .status{width:22px;height:22px}
+.compact .status .ms{font-size:18px}
+.compact .avatar{width:20px;height:20px;font-size:10px}
+.compact .row .icon-btn{width:24px;height:24px}
+.compact .row .icon-btn .ms{font-size:18px}
+.compact .tname{padding:2px 0;font-size:13px}
+.compact .tag{line-height:16px}
+.compact .cat-dot{width:12px;height:12px;border-radius:4px}
+.compact .addrow .status .ms{font-size:16px}
+.switch .track-ui{width:28px;height:16px;border-radius:99px;background:var(--line);position:relative;transition:background .15s;flex:none}
+.switch .track-ui::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.switch[aria-pressed="true"] .track-ui{background:var(--accent)}
+.switch[aria-pressed="true"] .track-ui::after{transform:translateX(12px)}
+.task:hover .label,.task.sel .label{background:var(--hover)}
+.task.chg .label{background:var(--accent-soft)}
+.status{width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex:none;color:var(--muted)}
+.status:hover{background:var(--surface)}
+.status.doing{color:var(--accent)}
+.status.done{color:#3A9A5B}
+.tname{flex:1;min-width:0;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:6px 0;font-size:13.5px;font-weight:600}
+.task.isdone .tname{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
+.task.unsched .tname{color:var(--muted)}
+/* sub-categories: a collapsible group of tasks inside a category */
+.row.cat.subcat .label{height:var(--row-h);padding-left:28px;gap:6px;border-bottom:0}
+.subcat .track{height:var(--row-h);background:rgba(29,28,42,.015)}
+.subcat .cat-name{font-size:13px}
+.subcat .tog{width:24px;height:24px}
+.subcat .sum{top:calc(var(--row-h) / 2 - 3px);height:6px}
+.task.insub .label{padding-left:52px}
+.addsub{display:inline-flex;align-items:center;gap:4px;flex:none;height:26px;padding:0 8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.addsub:hover{background:var(--hover);color:var(--ink)}
+.addsub .ms{font-size:16px}
+body.narrow .addsub .lbl{display:none}
+.dot-late{width:8px;height:8px;border-radius:50%;background:var(--late);flex:none}
+.dot-clash{width:8px;height:8px;border-radius:50%;background:var(--away);flex:none}
+.avatar{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:11px;flex:none}
+.row-del,.acts .icon-btn{opacity:0;transition:opacity .12s}
+.row:hover .row-del,.row:hover .acts .icon-btn,.row:focus-within .row-del,.row:focus-within .acts .icon-btn{opacity:1}
+@media (hover:none){.row-del,.acts .icon-btn{opacity:1}}
+.confirm{opacity:1!important;width:auto!important;padding:0 10px;background:var(--late)!important;color:#fff!important;font-size:12px}
+.testing .acts,.testing .row-del,.testing #addCat{display:none!important}
+.label{user-select:none}
+.addrow .label>*{opacity:.8}
+.addrow:hover .label>*,.addrow:focus-within .label>*{opacity:1}
+.addrow .status{color:var(--accent)}
+.addrow .tname{color:var(--muted)}
+.addrow .track{border-bottom-style:dashed}
+.drag-h{cursor:grab;touch-action:none}
+.tag.neutral{background:var(--hover);color:var(--ink-soft);box-shadow:inset 0 0 0 1px var(--line)}
+.tag{font-size:10.5px;font-weight:700;padding:0 7px;border-radius:999px;line-height:19px;flex:none;white-space:nowrap}
+.tagopt{height:30px;padding:0 12px;border-radius:999px;border:1.5px dashed var(--line);color:var(--muted);display:inline-flex;align-items:center;gap:4px;font-size:12.5px}
+.tagopt.on{border-style:solid;border-color:transparent}
+.tagopt .ms{font-size:16px}
+.tagedit{display:flex;gap:6px}
+.tagsw{width:14px!important;height:14px!important;border-radius:5px!important;flex:none;border:1px solid rgba(0,0,0,.08)!important}
+.taghead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.optrow{display:inline-flex;align-items:center;gap:8px}
+.optrow label{font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+.switch.plain{padding:0;border:0;background:none;display:inline-flex}
+.tagedit .in{flex:1}
+.row.reordering .label{opacity:.35}
+.row.cat.subcat.droptarget .label,.row.cat.droptarget .label{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.dropline{position:absolute;height:3px;background:var(--accent);border-radius:2px;z-index:9;pointer-events:none}
+body.rdrag,body.rdrag *{cursor:grabbing!important}
+
+/* bars */
+.bar{position:absolute;top:calc((var(--row-h) - var(--bar-h)) / 2);height:var(--bar-h);border-radius:10px;background:var(--fill);color:var(--ink2);z-index:2;display:flex;align-items:center;gap:4px;padding:0 10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;box-shadow:0 1px 0 rgba(0,0,0,.06);transition:opacity .15s}
+.bar:hover{filter:brightness(.97)}
+.bar.dragging{cursor:grabbing;box-shadow:var(--shadow);z-index:5}
+.bar .bn{overflow:hidden;text-overflow:ellipsis}
+.bar .bi{font-size:16px;flex:none}
+.bar.done{opacity:.45}
+/* in progress: a solid ring in the bar's own ink colour, plus the timelapse icon */
+.bar.doing{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--ink2) 60%,transparent)}
+.bar.late{background:var(--late-soft);color:var(--late-ink);outline:2px solid var(--late);outline-offset:-2px}
+.bar.blocked{outline:2px dashed var(--late);outline-offset:-2px}
+.bar.rel{outline:2px solid var(--accent);outline-offset:1px}
+.bar.sel{box-shadow:0 0 0 3px var(--accent-soft),0 0 0 5px var(--accent)}
+.bar.moved{outline:2.5px solid var(--accent);outline-offset:1px;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.45) 0 5px,transparent 5px 10px)}
+.grid.focus .bar:not(.moved){opacity:.22}
+.grid.focus .sum{opacity:.15}
+.h{position:absolute;top:0;bottom:0;width:10px;cursor:ew-resize;z-index:1}
+.h-l{left:0}.h-r{right:0}
+.h::after{content:"";position:absolute;top:8px;bottom:8px;width:3px;border-radius:2px;background:currentColor;opacity:0;left:3px}
+.bar:hover .h::after{opacity:.35}
+.ghost{position:absolute;top:calc((var(--row-h) - var(--bar-h)) / 2 - 1px);height:calc(var(--bar-h) + 2px);border-radius:10px;border:2px dashed var(--muted);opacity:.7;z-index:1;pointer-events:none;display:flex;align-items:center;padding:0 8px;font-size:12px;color:var(--muted);overflow:hidden;white-space:nowrap}
+.delta{position:absolute;top:calc((var(--row-h) - 20px) / 2);z-index:3;height:20px;padding:0 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-family:var(--font-display);font-weight:700;font-size:11.5px;display:inline-flex;align-items:center;gap:2px;white-space:nowrap;pointer-events:none}
+.delta.earlier{background:#2FA866;color:#fff}
+.unsched-hint{position:absolute;top:calc((var(--row-h) - var(--bar-h)) / 2);height:var(--bar-h);border:1.5px dashed var(--line);border-radius:10px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:12px;color:var(--muted);white-space:nowrap;pointer-events:none;background:var(--surface)}
+.track.placeable{cursor:copy}
+.unsched-hint .more{display:none}
+.track.placeable:hover .unsched-hint{border-color:var(--accent);color:var(--accent)}
+.track.placeable:hover .more{display:inline}
+.dragtip{position:fixed;z-index:50;background:var(--raised);color:var(--accent-ink);font-size:12px;font-weight:600;padding:5px 10px;border-radius:9px;pointer-events:none;white-space:nowrap}
+
+/* drawer */
+.drawer{position:fixed;top:12px;right:12px;bottom:12px;width:min(400px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);z-index:20;display:flex;flex-direction:column;transform:translateX(110%);transition:transform .22s ease}
+.drawer.open{transform:none}
+.dhead{display:flex;align-items:center;gap:8px;padding:14px 14px 0 18px}
+.catchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-family:var(--font-display);font-weight:700;font-size:12px}
+.dbody{padding:10px 18px 18px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.tinput{font-family:var(--font-display);font-weight:800;font-size:19px;border:0;background:none;padding:4px 0;width:100%;border-bottom:2px solid transparent}
+.tinput:focus{outline:none;border-bottom-color:var(--accent)}
+.tinput[readonly]{cursor:default}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label,.flabel{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.in{height:38px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 12px;width:100%;font-size:13.5px}
+textarea.in{height:110px;padding:10px 12px;resize:vertical;line-height:1.4}
+.in:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.hint{font-size:12.5px;font-weight:500;color:var(--muted);line-height:1.5;margin:0}
+.link{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.statusseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.statusseg button{height:38px;border-radius:12px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:13px}
+.statusseg button.on{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.statusseg button.on.done{background:#E2F5D9;color:#2F6B1F}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.dep{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:12.5px;max-width:100%}
+.dep .cd{width:8px;height:8px;border-radius:3px;flex:none}
+.dep span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dep button{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
+.dep button .ms{font-size:16px}
+.dep button:hover{background:var(--hover);color:var(--ink)}
+.dep.ro{padding-right:10px}
+.warnbox{display:flex;gap:8px;align-items:flex-start;background:#FFF0CF;color:#6B4E00;border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.5}
+.warnbox.red{background:var(--late-soft);color:var(--late-ink)}
+.warnbox.blue{background:var(--accent-soft);color:var(--accent)}
+.delaybtns{display:flex;gap:6px;flex-wrap:wrap}
+.delaybtns button{height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:13px}
+.delaybtns button:hover{border-color:var(--accent);color:var(--accent)}
+.dfoot{margin-top:auto;padding:12px 18px 16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.btn.danger{color:var(--late)}
+.btn.danger.confirm{background:var(--late)!important;color:#fff!important}
+.testing .real-only{display:none!important}
+.test-only{display:none!important}
+.testing .test-only{display:flex!important}
+
+/* change sheet, modal, toast */
+.sheet{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px 18px;width:min(720px,calc(100vw - 24px));max-height:min(60vh,520px);display:flex;flex-direction:column;gap:10px}
+.sheet.test{border:2px solid var(--accent)}
+.sheet h2{font-family:var(--font-display);font-weight:800;font-size:18px;margin:0;display:flex;gap:8px;align-items:center}
+.sheet h2 .ms{color:var(--accent)}
+.ctable{overflow:auto;border:1px solid var(--line);border-radius:14px}
+.ctable table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ctable th{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--muted);text-align:left;padding:8px 10px;position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--line)}
+.ctable td{padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ctable tr:last-child td{border-bottom:0}
+.ctable td.nm{white-space:normal;min-width:160px}
+.ctable .cd{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.ctable .was{color:var(--muted);text-decoration:line-through}
+.ctable .ch{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--accent)}
+.ctable .you{font-size:11px;color:var(--accent);margin-left:4px}
+.sheet .btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.scrim{position:fixed;inset:0;background:rgba(29,28,42,.35);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);width:min(400px,100%);padding:20px;display:flex;flex-direction:column;gap:14px}
+.modal h2{font-family:var(--font-display);font-weight:800;font-size:19px;margin:0}
+.swatches{display:grid;grid-template-columns:repeat(9,1fr);gap:7px}
+.swatches button{aspect-ratio:1;border-radius:10px;border:2px solid transparent}
+.swatches button.on{border-color:var(--ink)}
+.pswatch{grid-template-columns:repeat(7,1fr)}
+.pswatch button{font-family:var(--font-display);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.pswatch button:disabled{cursor:not-allowed;opacity:.55}
+.toasts{position:fixed;left:20px;bottom:20px;z-index:60;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--raised);color:var(--accent-ink);padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow)}
+.toast button{color:var(--lime)}
+.empty{position:sticky;left:0;width:min(100%,520px);margin:60px auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted)}
+.empty h2{font-family:var(--font-display);font-weight:800;color:var(--ink);margin:0;font-size:20px}
+kbd{font-family:var(--font-display);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 5px}
+.drawer.notes{width:min(460px,calc(100vw - 24px))}
+.titlewrap{display:flex;align-items:center;gap:4px}
+.titlewrap h1{line-height:1}
+.notes-btn{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);opacity:.45;flex:none}
+.notes-btn svg{display:block}
+.notes-btn:hover,.notes-btn:focus-visible{opacity:1;background:var(--hover)}
+.notes .dbody,.notes .dbody .in,.notes .dbody .btn,.notes .link{font-weight:500}
+.notes .sumtext,.notes .logday li{font-size:13.5px;line-height:1.55}
+.notes h3{font-family:var(--font-display);font-weight:800;font-size:14px;margin:0;display:flex;align-items:center;gap:8px}
+.notes section{display:flex;flex-direction:column;gap:10px}
+.sumtext{font-size:16px;line-height:1.45;display:flex;flex-direction:column;gap:6px}
+.sumtext p{margin:0}
+.sumtext .sh{font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--muted);margin-top:6px}
+.sumtext ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:3px}
+.logform{display:flex;gap:6px}
+.logform .in{flex:1}
+.logday{display:flex;flex-direction:column;gap:4px}
+.logdate{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--muted);position:sticky;top:0;background:var(--surface);padding:4px 0}
+.logday ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+.logday li{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:10px;line-height:1.35}
+.logday li:hover{background:var(--hover)}
+.logday li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;margin-top:8px}
+.logday li span{flex:1}
+.logday li .icon-btn{width:26px;height:26px;opacity:0}
+.logday li:hover .icon-btn,.logday li .icon-btn:focus-visible{opacity:1}
+.readonly .notes .edit-only{display:none!important}
+.readonly .acts,.readonly .row-del,.readonly #addCat,.readonly .dfoot,.readonly #morewrap{display:none!important}
+.head .label{justify-content:space-between}
+.headname{flex:1;min-width:0}
+.headadd{display:inline-flex;align-items:center;gap:2px;flex:none;height:28px;padding:0 10px 0 6px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-family:var(--font-body,inherit);font-size:12.5px;font-weight:700;white-space:nowrap}
+.headadd:hover{filter:brightness(1.25)}
+.headadd .ms{font-size:18px}
+body.narrow .headadd{padding:0 5px}
+body.narrow .headadd .lbl{display:none}
+.listtog{width:26px;height:26px}
+.listtog .ms{font-size:18px}
+body.narrow{--label-w:170px}
+.narrow .task .label{padding-left:8px}
+.narrow .task .label .avatar,.narrow .task .tag,.narrow .row-del,.narrow .dot-late,.narrow .dot-clash,.narrow .count{display:none!important}
+.narrow .cat .tog{display:none}
+.narrow .cat .label{padding-left:10px}
+.selchip{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:25;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:8px 8px 8px 14px;max-width:calc(100vw - 24px)}
+.selchip .dotsel{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.selchip .sname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.selchip .smuted{color:var(--muted);font-size:12.5px;margin-right:4px}
+.selchip .btn{height:32px;padding:0 10px;font-size:13px}
+/* team members: stacked initials when several people share a task */
+.avstack{display:inline-flex;flex:none;align-items:center}
+.avstack .avatar{box-shadow:0 0 0 1.5px var(--surface)}
+.avstack .avatar+.avatar{margin-left:-7px}
+.avatar{letter-spacing:-.02em}
+.compact .avatar{width:21px;height:21px;font-size:9.5px}
+.tagopt .avatar{width:18px;height:18px;font-size:8.5px;margin-left:-6px;box-shadow:none}
+.tagopt.person{padding-left:10px}
+
+/* team away: one row per person, leave shown as grey striped bars */
+:root{--away:#D98200;--away-soft:#FFF0CF;--away-ink:#6B4E00}
+.away-dot{background:repeating-linear-gradient(135deg,#CFCDC8 0 3px,#EDECE8 3px 6px)}
+.awayrow.task .label{gap:8px}
+.pname{flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track.awayplace{cursor:copy}
+.awayrow.task .track{background:rgba(29,28,42,.015)}
+.awayrow.last .track{border-bottom:2px solid var(--line)}
+.bar.leave{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--lf) 55%,#fff) 0 6px,color-mix(in srgb,var(--lf) 28%,#fff) 6px 12px);color:var(--ink2);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--lf) 70%,#fff)}
+.bar.leave .bi{opacity:.7}
+/* initials at the start of a bar; on bars too short to hold them they sit just outside the left end */
+.baravs{display:inline-flex;flex:none;position:relative;z-index:1;margin-left:-4px;margin-right:2px}
+.baravs .avatar{width:16px;height:16px;font-size:7.5px;box-shadow:0 0 0 1.5px rgba(255,255,255,.85)}
+.baravs .avatar+.avatar{margin-left:-6px}
+.bar.avout{overflow:visible}
+.bar.avout .baravs{position:absolute;top:50%;transform:translateY(-50%);margin:0}
+/* the bar's own contents are clipped to the bar; only the outside initials can sit beyond it */
+.bclip{position:absolute;inset:0;display:flex;align-items:center;gap:4px;padding:inherit;overflow:hidden;border-radius:inherit;pointer-events:none}
+.h{z-index:2}
+/* mini Team Away: a thin strip, one lane per person with time away, that slides in under the date header once the Team Away rows have scrolled out of view */
+.awaymini{position:sticky;top:var(--head-h);z-index:5;height:0;pointer-events:none}
+.aminner{position:absolute;left:0;top:0;width:100%;display:flex;transform:translateY(-100%);opacity:0;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s ease;box-shadow:0 8px 14px -10px rgba(29,28,42,.35)}
+.awaymini.on .aminner{transform:none;opacity:1;pointer-events:auto}
+.awaymini.noanim .aminner{transition:none}
+.aminner .label{padding:0;align-items:stretch;border-bottom:1px solid var(--line)}
+.amlist{flex:1;min-width:0;display:flex;flex-direction:column;padding:4px 10px 4px 12px;text-align:left}
+.amname{height:13px;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600;color:var(--ink);line-height:1;white-space:nowrap;overflow:hidden}
+.amname .avatar{width:11px;height:11px;font-size:5.5px;flex:none}
+.aminner .track{background:var(--surface)}
+.ambar{position:absolute;height:9px;border-radius:4px;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--lf) 55%,#fff) 0 6px,color-mix(in srgb,var(--lf) 28%,#fff) 6px 12px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--lf) 70%,#fff)}
+.amtoday{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);border-radius:2px}
+/* clash: the days of a task that fall while someone on it is away */
+.clashseg{position:absolute;top:0;bottom:0;pointer-events:none;background:repeating-linear-gradient(135deg,rgba(217,130,0,.12) 0 3px,rgba(217,130,0,.55) 3px 6px);border-top:2px solid var(--away);border-bottom:2px solid var(--away)}
+.bar .bn,.bar .bi{position:relative;z-index:1}
+.sw.away{background:repeating-linear-gradient(135deg,#FFE7B3 0 3px,var(--away) 3px 5px)}
+.chip.warn{background:var(--away-soft);color:var(--away-ink);border-color:transparent}
+.clashlist{display:flex;flex-direction:column;gap:6px}
+.clashlist .warnbox{flex-direction:row}
+.movebtns{display:flex;gap:6px;flex-wrap:wrap}
+.movebtns .btn{height:32px;font-size:12.5px;padding:0 10px;background:rgba(255,255,255,.6)}
+.dep.click{cursor:pointer}
+.clashpill{display:inline-flex;align-items:center;gap:3px;height:20px;padding:0 7px;border-radius:999px;background:var(--away-soft);color:var(--away-ink);font-size:10.5px;font-weight:700;white-space:nowrap;flex:none}
+.clashpill .ms{font-size:13px}
+.clashpill:hover{background:#FFE2A3}
+.pbtn{display:flex;align-items:center;gap:8px;flex:1;min-width:0;text-align:left;border-radius:8px}
+.pbtn:hover .pname{text-decoration:underline;text-underline-offset:2px}
+.awaylist{display:flex;flex-direction:column;gap:6px}
+.awayitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);text-align:left;width:100%}
+.awayitem:hover{border-color:var(--accent)}
+.awayitem .ms{color:var(--muted);font-size:18px;width:18px;overflow:hidden;flex:none}
+.awayitem .ai{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.awayitem .ai b{font-size:13px}
+.awayitem .ai span{font-size:12px;color:var(--muted)}
+.awayitem .clashpill .ms{color:inherit;font-size:13px;width:13px}
+.awayitem .chev{transition:transform .15s}
+.awaywrap.open .chev{transform:rotate(180deg)}
+.awaywrap.open .awayitem{border-color:var(--accent);border-bottom-left-radius:0;border-bottom-right-radius:0;background:var(--surface)}
+.awayedit{border:1px solid var(--accent);border-top:0;border-radius:0 0 12px 12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.awayedit .btn{height:32px;font-size:12.5px}
+.addhint{display:flex;align-items:center;gap:6px}
+.addhint .ms{font-size:16px;width:16px;overflow:hidden;flex:none}
+.bar.draft{background:var(--accent-soft);outline:2px dashed var(--accent);outline-offset:-2px;color:var(--accent);pointer-events:none;z-index:4;cursor:copy}
+.track.placeable,.track.awayplace{cursor:crosshair}
+.dep.click:hover{border-color:var(--accent)}
+.dep .dd{color:var(--away-ink);font-weight:700;font-size:11.5px;flex:none}
+@media (max-width:700px){:root{--label-w:180px}.task .label{padding-left:12px}.label .avatar{display:none}}
+
+/* checklist: optional sub-tasks in task details, with progress on the bar and the bottom chip */
+.cl{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0}
+.clhead{display:flex;align-items:center;gap:8px}
+.clhead .ms.lead{font-size:18px;color:var(--muted)}
+.cltitle{flex:1;min-width:0;font-family:var(--font-display);font-weight:700;font-size:14px;padding:4px 0}
+.clcount{font-family:var(--font-display);font-weight:700;font-size:12px;color:var(--muted);flex:none}
+.clcount.full{color:#2F6B1F}
+.clprog{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.clprog i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .25s ease}
+.clprog.full i{background:#3A9A5B}
+.clitems{display:flex;flex-direction:column}
+.clitem{display:flex;align-items:center;gap:6px;border-radius:10px;padding:0 4px 0 2px}
+.clitem:hover,.clitem:focus-within{background:var(--hover)}
+/* drag handle to reorder todos */
+.cldrag{width:16px;height:28px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);cursor:grab;touch-action:none;opacity:0;margin-right:-6px;transition:opacity .12s}
+.cldrag .ms{font-size:16px}
+.clitem:hover .cldrag,.clitem:focus-within .cldrag{opacity:.7}
+@media (hover:none){.cldrag{opacity:.7}}
+.clitem.cldragging{opacity:.4}
+.clitem.dropbefore{box-shadow:0 -2px 0 var(--accent)}
+.clitem.dropafter{box-shadow:0 2px 0 var(--accent)}
+.clitems+.cladd,.cladd{padding-left:12px}
+.clbox{width:28px;height:28px;flex:none;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);border-radius:8px}
+.clbox .ms{font-size:20px}
+.clitem.done .clbox{color:#3A9A5B}
+.cltext{flex:1;min-width:0;border:0;background:none;padding:6px 0;font-size:13.5px;font-weight:600}
+.cltext:focus{outline:none}
+.clitem.done .cltext{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
+.clitem .icon-btn{width:26px;height:26px;opacity:0}
+.clitem:hover .icon-btn,.clitem:focus-within .icon-btn{opacity:1}
+@media (hover:none){.clitem .icon-btn{opacity:1}}
+.cladd{display:flex;align-items:center;gap:6px;padding:0 4px 0 2px;border-radius:10px}
+.cladd:hover,.cladd:focus-within{background:var(--hover)}
+.cladd .clbox{color:var(--muted);opacity:.6;cursor:text}
+.cladd .cltext::placeholder{color:var(--muted);font-weight:500}
+.cladd .btn{height:28px;padding:0 10px;font-size:12.5px;border-radius:9px}
+.cladd .cltext:placeholder-shown + .btn{display:none}
+.clpill{display:inline-flex;align-items:center;gap:3px;flex:none;font-family:var(--font-display);font-weight:700}
+.clpill .ms{font-size:14px}
+.bar .clpill{margin-left:auto;padding:0 6px 0 4px;height:16px;border-radius:999px;background:rgba(255,255,255,.6);font-size:10.5px;position:relative;z-index:1}
+.bar .clpill .ms{font-size:12px}
+.selchip .clpill{height:24px;padding:0 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:12px}
+.selchip .clpill.full{background:#E2F5D9;color:#2F6B1F}
+
+/* press feedback: buttons sink a little while held and spring back on release */
+button,.dep.click{transition:transform .22s cubic-bezier(.3,1.5,.5,1)}
+.row-del,.acts .icon-btn,.clitem .icon-btn{transition:opacity .12s,transform .22s cubic-bezier(.3,1.5,.5,1)}
+button:not(:disabled):not(.tname):not(.cat-name):active,.dep.click:active{transform:scale(.94);transition-duration:.07s;transition-timing-function:ease-out}
+.awayitem:active,.btn:not(:disabled):active{transform:scale(.97)!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}button:active,.dep.click:active{transform:none!important}}
+</style>
+</head>
+<body>
+<h2 class="sr">S2 launch plan: an editable Gantt chart of tasks grouped by category.</h2>
+<header class="top">
+  <h1 id="title">S2 Launch Plan</h1>
+  <div class="stats" id="stats"></div>
+  <div class="tools">
+    <div class="menuwrap">
+      <button class="btn" data-act="menu" aria-haspopup="true" aria-expanded="false" title="View: week or month, or jump to today"><span id="viewLbl">Week</span><span class="ms">expand_more</span></button>
+      <div class="menu" role="menu">
+        <button data-act="today" role="menuitem"><span class="ms">today</span>Today</button>
+        <i class="msep"></i>
+        <button id="zWeek" data-act="zoom" data-z="week" role="menuitem"><span class="ms">view_week</span>Week</button>
+        <button id="zMonth" data-act="zoom" data-z="month" role="menuitem"><span class="ms">calendar_month</span>Month</button>
+      </div>
+    </div>
+    <button class="btn sq" data-act="undo" title="Undo (⌘Z)" aria-label="Undo"><span class="ms">undo</span></button>
+    <button class="btn sq" data-act="redo" title="Redo (⇧⌘Z)" aria-label="Redo"><span class="ms">redo</span></button>
+    <div class="legwrap" id="legwrap">
+    <button class="btn" data-act="legend" aria-haspopup="true" aria-expanded="false" aria-controls="legend">Legend</button>
+    <div class="legend" id="legend" role="group" aria-label="Legend">
+      <span><i class="sw today"></i>Today</span>
+      <span><i class="sw launch"></i>Launch</span>
+      <span><i class="sw ms"></i>Milestone</span>
+      <span><i class="sw late"></i>Late</span>
+      <span><i class="sw blocked"></i>Blocked By A Late Task</span>
+      <span><i class="sw away"></i>Assigned Person Away</span>
+      <span><i class="sw doing"></i>In Progress</span>
+      <span><i class="sw done"></i>Done</span>
+    </div>
+    </div>
+    <div class="menuwrap" id="morewrap">
+      <button class="btn sq" data-act="menu" aria-haspopup="true" aria-expanded="false" title="More" aria-label="More"><span class="ms">menu</span></button>
+      <div class="menu right" role="menu">
+        <button id="testBtn" data-act="test" role="menuitem" title="Try out delays and moves without changing the real plan"><span class="ms">science</span>Test Mode</button>
+      </div>
+    </div>
+    <button class="notes-btn" id="notesBtn" data-act="notes" title="Plan notes: summary and changelog" aria-label="Plan notes"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.75" r=".6" fill="currentColor"/></svg></button>
+  </div>
+</header>
+<div class="teststrip"><span class="ms">science</span><span>Test Mode is on. Drag bars, change dates or add delays to see what would happen. Nothing is saved unless you apply it.</span><button class="btn" data-act="test" style="margin-left:auto;height:30px"><span class="ms" style="font-size:18px">close</span>Exit Test Mode</button></div>
+<main class="board" id="board"><div class="empty"><h2>Loading The Plan…</h2></div></main>
+<aside class="drawer" id="drawer" aria-label="Task details"></aside>
+<aside class="drawer notes" id="notes" aria-label="Plan notes"></aside>
+<div id="sheet"></div>
+<div id="selchip"></div>
+<div id="modal"></div>
+<div class="toasts" id="toasts"></div>
+<datalist id="owners"></datalist>
+
+<script>
+/* canvas-confetti 1.9.4 (ISC licence, github.com/catdad/canvas-confetti), inlined so it works offline */
+// canvas-confetti v1.9.4 built on 2025-10-25T05:14:56.640Z
+!(function (window, module) {
+// source content
+/* globals Map */
+
+(function main(global, module, isWorker, workerSize) {
+  var canUseWorker = !!(
+    global.Worker &&
+    global.Blob &&
+    global.Promise &&
+    global.OffscreenCanvas &&
+    global.OffscreenCanvasRenderingContext2D &&
+    global.HTMLCanvasElement &&
+    global.HTMLCanvasElement.prototype.transferControlToOffscreen &&
+    global.URL &&
+    global.URL.createObjectURL);
+
+  var canUsePaths = typeof Path2D === 'function' && typeof DOMMatrix === 'function';
+  var canDrawBitmap = (function () {
+    // this mostly supports ssr
+    if (!global.OffscreenCanvas) {
+      return false;
+    }
+
+    try {
+      var canvas = new OffscreenCanvas(1, 1);
+      var ctx = canvas.getContext('2d');
+      ctx.fillRect(0, 0, 1, 1);
+      var bitmap = canvas.transferToImageBitmap();
+      ctx.createPattern(bitmap, 'no-repeat');
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  })();
+
+  function noop() {}
+
+  // create a promise if it exists, otherwise, just
+  // call the function directly
+  function promise(func) {
+    var ModulePromise = module.exports.Promise;
+    var Prom = ModulePromise !== void 0 ? ModulePromise : global.Promise;
+
+    if (typeof Prom === 'function') {
+      return new Prom(func);
+    }
+
+    func(noop, noop);
+
+    return null;
+  }
+
+  var bitmapMapper = (function (skipTransform, map) {
+    // see https://github.com/catdad/canvas-confetti/issues/209
+    // creating canvases is actually pretty expensive, so we should create a
+    // 1:1 map for bitmap:canvas, so that we can animate the confetti in
+    // a performant manner, but also not store them forever so that we don't
+    // have a memory leak
+    return {
+      transform: function(bitmap) {
+        if (skipTransform) {
+          return bitmap;
+        }
+
+        if (map.has(bitmap)) {
+          return map.get(bitmap);
+        }
+
+        var canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(bitmap, 0, 0);
+
+        map.set(bitmap, canvas);
+
+        return canvas;
+      },
+      clear: function () {
+        map.clear();
+      }
+    };
+  })(canDrawBitmap, new Map());
+
+  var raf = (function () {
+    var TIME = Math.floor(1000 / 60);
+    var frame, cancel;
+    var frames = {};
+    var lastFrameTime = 0;
+
+    if (typeof requestAnimationFrame === 'function' && typeof cancelAnimationFrame === 'function') {
+      frame = function (cb) {
+        var id = Math.random();
+
+        frames[id] = requestAnimationFrame(function onFrame(time) {
+          if (lastFrameTime === time || lastFrameTime + TIME - 1 < time) {
+            lastFrameTime = time;
+            delete frames[id];
+
+            cb();
+          } else {
+            frames[id] = requestAnimationFrame(onFrame);
+          }
+        });
+
+        return id;
+      };
+      cancel = function (id) {
+        if (frames[id]) {
+          cancelAnimationFrame(frames[id]);
+        }
+      };
+    } else {
+      frame = function (cb) {
+        return setTimeout(cb, TIME);
+      };
+      cancel = function (timer) {
+        return clearTimeout(timer);
+      };
+    }
+
+    return { frame: frame, cancel: cancel };
+  }());
+
+  var getWorker = (function () {
+    var worker;
+    var prom;
+    var resolves = {};
+
+    function decorate(worker) {
+      function execute(options, callback) {
+        worker.postMessage({ options: options || {}, callback: callback });
+      }
+      worker.init = function initWorker(canvas) {
+        var offscreen = canvas.transferControlToOffscreen();
+        worker.postMessage({ canvas: offscreen }, [offscreen]);
+      };
+
+      worker.fire = function fireWorker(options, size, done) {
+        if (prom) {
+          execute(options, null);
+          return prom;
+        }
+
+        var id = Math.random().toString(36).slice(2);
+
+        prom = promise(function (resolve) {
+          function workerDone(msg) {
+            if (msg.data.callback !== id) {
+              return;
+            }
+
+            delete resolves[id];
+            worker.removeEventListener('message', workerDone);
+
+            prom = null;
+
+            bitmapMapper.clear();
+
+            done();
+            resolve();
+          }
+
+          worker.addEventListener('message', workerDone);
+          execute(options, id);
+
+          resolves[id] = workerDone.bind(null, { data: { callback: id }});
+        });
+
+        return prom;
+      };
+
+      worker.reset = function resetWorker() {
+        worker.postMessage({ reset: true });
+
+        for (var id in resolves) {
+          resolves[id]();
+          delete resolves[id];
+        }
+      };
+    }
+
+    return function () {
+      if (worker) {
+        return worker;
+      }
+
+      if (!isWorker && canUseWorker) {
+        var code = [
+          'var CONFETTI, SIZE = {}, module = {};',
+          '(' + main.toString() + ')(this, module, true, SIZE);',
+          'onmessage = function(msg) {',
+          '  if (msg.data.options) {',
+          '    CONFETTI(msg.data.options).then(function () {',
+          '      if (msg.data.callback) {',
+          '        postMessage({ callback: msg.data.callback });',
+          '      }',
+          '    });',
+          '  } else if (msg.data.reset) {',
+          '    CONFETTI && CONFETTI.reset();',
+          '  } else if (msg.data.resize) {',
+          '    SIZE.width = msg.data.resize.width;',
+          '    SIZE.height = msg.data.resize.height;',
+          '  } else if (msg.data.canvas) {',
+          '    SIZE.width = msg.data.canvas.width;',
+          '    SIZE.height = msg.data.canvas.height;',
+          '    CONFETTI = module.exports.create(msg.data.canvas);',
+          '  }',
+          '}',
+        ].join('\n');
+        try {
+          worker = new Worker(URL.createObjectURL(new Blob([code])));
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          typeof console !== 'undefined' && typeof console.warn === 'function' ? console.warn('🎊 Could not load worker', e) : null;
+
+          return null;
+        }
+
+        decorate(worker);
+      }
+
+      return worker;
+    };
+  })();
+
+  var defaults = {
+    particleCount: 50,
+    angle: 90,
+    spread: 45,
+    startVelocity: 45,
+    decay: 0.9,
+    gravity: 1,
+    drift: 0,
+    ticks: 200,
+    x: 0.5,
+    y: 0.5,
+    shapes: ['square', 'circle'],
+    zIndex: 100,
+    colors: [
+      '#26ccff',
+      '#a25afd',
+      '#ff5e7e',
+      '#88ff5a',
+      '#fcff42',
+      '#ffa62d',
+      '#ff36ff'
+    ],
+    // probably should be true, but back-compat
+    disableForReducedMotion: false,
+    scalar: 1
+  };
+
+  function convert(val, transform) {
+    return transform ? transform(val) : val;
+  }
+
+  function isOk(val) {
+    return !(val === null || val === undefined);
+  }
+
+  function prop(options, name, transform) {
+    return convert(
+      options && isOk(options[name]) ? options[name] : defaults[name],
+      transform
+    );
+  }
+
+  function onlyPositiveInt(number){
+    return number < 0 ? 0 : Math.floor(number);
+  }
+
+  function randomInt(min, max) {
+    // [min, max)
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  function toDecimal(str) {
+    return parseInt(str, 16);
+  }
+
+  function colorsToRgb(colors) {
+    return colors.map(hexToRgb);
+  }
+
+  function hexToRgb(str) {
+    var val = String(str).replace(/[^0-9a-f]/gi, '');
+
+    if (val.length < 6) {
+        val = val[0]+val[0]+val[1]+val[1]+val[2]+val[2];
+    }
+
+    return {
+      r: toDecimal(val.substring(0,2)),
+      g: toDecimal(val.substring(2,4)),
+      b: toDecimal(val.substring(4,6))
+    };
+  }
+
+  function getOrigin(options) {
+    var origin = prop(options, 'origin', Object);
+    origin.x = prop(origin, 'x', Number);
+    origin.y = prop(origin, 'y', Number);
+
+    return origin;
+  }
+
+  function setCanvasWindowSize(canvas) {
+    canvas.width = document.documentElement.clientWidth;
+    canvas.height = document.documentElement.clientHeight;
+  }
+
+  function setCanvasRectSize(canvas) {
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }
+
+  function getCanvas(zIndex) {
+    var canvas = document.createElement('canvas');
+
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0px';
+    canvas.style.left = '0px';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = zIndex;
+
+    return canvas;
+  }
+
+  function ellipse(context, x, y, radiusX, radiusY, rotation, startAngle, endAngle, antiClockwise) {
+    context.save();
+    context.translate(x, y);
+    context.rotate(rotation);
+    context.scale(radiusX, radiusY);
+    context.arc(0, 0, 1, startAngle, endAngle, antiClockwise);
+    context.restore();
+  }
+
+  function randomPhysics(opts) {
+    var radAngle = opts.angle * (Math.PI / 180);
+    var radSpread = opts.spread * (Math.PI / 180);
+
+    return {
+      x: opts.x,
+      y: opts.y,
+      wobble: Math.random() * 10,
+      wobbleSpeed: Math.min(0.11, Math.random() * 0.1 + 0.05),
+      velocity: (opts.startVelocity * 0.5) + (Math.random() * opts.startVelocity),
+      angle2D: -radAngle + ((0.5 * radSpread) - (Math.random() * radSpread)),
+      tiltAngle: (Math.random() * (0.75 - 0.25) + 0.25) * Math.PI,
+      color: opts.color,
+      shape: opts.shape,
+      tick: 0,
+      totalTicks: opts.ticks,
+      decay: opts.decay,
+      drift: opts.drift,
+      random: Math.random() + 2,
+      tiltSin: 0,
+      tiltCos: 0,
+      wobbleX: 0,
+      wobbleY: 0,
+      gravity: opts.gravity * 3,
+      ovalScalar: 0.6,
+      scalar: opts.scalar,
+      flat: opts.flat
+    };
+  }
+
+  function updateFetti(context, fetti) {
+    fetti.x += Math.cos(fetti.angle2D) * fetti.velocity + fetti.drift;
+    fetti.y += Math.sin(fetti.angle2D) * fetti.velocity + fetti.gravity;
+    fetti.velocity *= fetti.decay;
+
+    if (fetti.flat) {
+      fetti.wobble = 0;
+      fetti.wobbleX = fetti.x + (10 * fetti.scalar);
+      fetti.wobbleY = fetti.y + (10 * fetti.scalar);
+
+      fetti.tiltSin = 0;
+      fetti.tiltCos = 0;
+      fetti.random = 1;
+    } else {
+      fetti.wobble += fetti.wobbleSpeed;
+      fetti.wobbleX = fetti.x + ((10 * fetti.scalar) * Math.cos(fetti.wobble));
+      fetti.wobbleY = fetti.y + ((10 * fetti.scalar) * Math.sin(fetti.wobble));
+
+      fetti.tiltAngle += 0.1;
+      fetti.tiltSin = Math.sin(fetti.tiltAngle);
+      fetti.tiltCos = Math.cos(fetti.tiltAngle);
+      fetti.random = Math.random() + 2;
+    }
+
+    var progress = (fetti.tick++) / fetti.totalTicks;
+
+    var x1 = fetti.x + (fetti.random * fetti.tiltCos);
+    var y1 = fetti.y + (fetti.random * fetti.tiltSin);
+    var x2 = fetti.wobbleX + (fetti.random * fetti.tiltCos);
+    var y2 = fetti.wobbleY + (fetti.random * fetti.tiltSin);
+
+    context.fillStyle = 'rgba(' + fetti.color.r + ', ' + fetti.color.g + ', ' + fetti.color.b + ', ' + (1 - progress) + ')';
+
+    context.beginPath();
+
+    if (canUsePaths && fetti.shape.type === 'path' && typeof fetti.shape.path === 'string' && Array.isArray(fetti.shape.matrix)) {
+      context.fill(transformPath2D(
+        fetti.shape.path,
+        fetti.shape.matrix,
+        fetti.x,
+        fetti.y,
+        Math.abs(x2 - x1) * 0.1,
+        Math.abs(y2 - y1) * 0.1,
+        Math.PI / 10 * fetti.wobble
+      ));
+    } else if (fetti.shape.type === 'bitmap') {
+      var rotation = Math.PI / 10 * fetti.wobble;
+      var scaleX = Math.abs(x2 - x1) * 0.1;
+      var scaleY = Math.abs(y2 - y1) * 0.1;
+      var width = fetti.shape.bitmap.width * fetti.scalar;
+      var height = fetti.shape.bitmap.height * fetti.scalar;
+
+      var matrix = new DOMMatrix([
+        Math.cos(rotation) * scaleX,
+        Math.sin(rotation) * scaleX,
+        -Math.sin(rotation) * scaleY,
+        Math.cos(rotation) * scaleY,
+        fetti.x,
+        fetti.y
+      ]);
+
+      // apply the transform matrix from the confetti shape
+      matrix.multiplySelf(new DOMMatrix(fetti.shape.matrix));
+
+      var pattern = context.createPattern(bitmapMapper.transform(fetti.shape.bitmap), 'no-repeat');
+      pattern.setTransform(matrix);
+
+      context.globalAlpha = (1 - progress);
+      context.fillStyle = pattern;
+      context.fillRect(
+        fetti.x - (width / 2),
+        fetti.y - (height / 2),
+        width,
+        height
+      );
+      context.globalAlpha = 1;
+    } else if (fetti.shape === 'circle') {
+      context.ellipse ?
+        context.ellipse(fetti.x, fetti.y, Math.abs(x2 - x1) * fetti.ovalScalar, Math.abs(y2 - y1) * fetti.ovalScalar, Math.PI / 10 * fetti.wobble, 0, 2 * Math.PI) :
+        ellipse(context, fetti.x, fetti.y, Math.abs(x2 - x1) * fetti.ovalScalar, Math.abs(y2 - y1) * fetti.ovalScalar, Math.PI / 10 * fetti.wobble, 0, 2 * Math.PI);
+    } else if (fetti.shape === 'star') {
+      var rot = Math.PI / 2 * 3;
+      var innerRadius = 4 * fetti.scalar;
+      var outerRadius = 8 * fetti.scalar;
+      var x = fetti.x;
+      var y = fetti.y;
+      var spikes = 5;
+      var step = Math.PI / spikes;
+
+      while (spikes--) {
+        x = fetti.x + Math.cos(rot) * outerRadius;
+        y = fetti.y + Math.sin(rot) * outerRadius;
+        context.lineTo(x, y);
+        rot += step;
+
+        x = fetti.x + Math.cos(rot) * innerRadius;
+        y = fetti.y + Math.sin(rot) * innerRadius;
+        context.lineTo(x, y);
+        rot += step;
+      }
+    } else {
+      context.moveTo(Math.floor(fetti.x), Math.floor(fetti.y));
+      context.lineTo(Math.floor(fetti.wobbleX), Math.floor(y1));
+      context.lineTo(Math.floor(x2), Math.floor(y2));
+      context.lineTo(Math.floor(x1), Math.floor(fetti.wobbleY));
+    }
+
+    context.closePath();
+    context.fill();
+
+    return fetti.tick < fetti.totalTicks;
+  }
+
+  function animate(canvas, fettis, resizer, size, done) {
+    var animatingFettis = fettis.slice();
+    var context = canvas.getContext('2d');
+    var animationFrame;
+    var destroy;
+
+    var prom = promise(function (resolve) {
+      function onDone() {
+        animationFrame = destroy = null;
+
+        context.clearRect(0, 0, size.width, size.height);
+        bitmapMapper.clear();
+
+        done();
+        resolve();
+      }
+
+      function update() {
+        if (isWorker && !(size.width === workerSize.width && size.height === workerSize.height)) {
+          size.width = canvas.width = workerSize.width;
+          size.height = canvas.height = workerSize.height;
+        }
+
+        if (!size.width && !size.height) {
+          resizer(canvas);
+          size.width = canvas.width;
+          size.height = canvas.height;
+        }
+
+        context.clearRect(0, 0, size.width, size.height);
+
+        animatingFettis = animatingFettis.filter(function (fetti) {
+          return updateFetti(context, fetti);
+        });
+
+        if (animatingFettis.length) {
+          animationFrame = raf.frame(update);
+        } else {
+          onDone();
+        }
+      }
+
+      animationFrame = raf.frame(update);
+      destroy = onDone;
+    });
+
+    return {
+      addFettis: function (fettis) {
+        animatingFettis = animatingFettis.concat(fettis);
+
+        return prom;
+      },
+      canvas: canvas,
+      promise: prom,
+      reset: function () {
+        if (animationFrame) {
+          raf.cancel(animationFrame);
+        }
+
+        if (destroy) {
+          destroy();
+        }
+      }
+    };
+  }
+
+  function confettiCannon(canvas, globalOpts) {
+    var isLibCanvas = !canvas;
+    var allowResize = !!prop(globalOpts || {}, 'resize');
+    var hasResizeEventRegistered = false;
+    var globalDisableForReducedMotion = prop(globalOpts, 'disableForReducedMotion', Boolean);
+    var shouldUseWorker = canUseWorker && !!prop(globalOpts || {}, 'useWorker');
+    var worker = shouldUseWorker ? getWorker() : null;
+    var resizer = isLibCanvas ? setCanvasWindowSize : setCanvasRectSize;
+    var initialized = (canvas && worker) ? !!canvas.__confetti_initialized : false;
+    var preferLessMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion)').matches;
+    var animationObj;
+
+    function fireLocal(options, size, done) {
+      var particleCount = prop(options, 'particleCount', onlyPositiveInt);
+      var angle = prop(options, 'angle', Number);
+      var spread = prop(options, 'spread', Number);
+      var startVelocity = prop(options, 'startVelocity', Number);
+      var decay = prop(options, 'decay', Number);
+      var gravity = prop(options, 'gravity', Number);
+      var drift = prop(options, 'drift', Number);
+      var colors = prop(options, 'colors', colorsToRgb);
+      var ticks = prop(options, 'ticks', Number);
+      var shapes = prop(options, 'shapes');
+      var scalar = prop(options, 'scalar');
+      var flat = !!prop(options, 'flat');
+      var origin = getOrigin(options);
+
+      var temp = particleCount;
+      var fettis = [];
+
+      var startX = canvas.width * origin.x;
+      var startY = canvas.height * origin.y;
+
+      while (temp--) {
+        fettis.push(
+          randomPhysics({
+            x: startX,
+            y: startY,
+            angle: angle,
+            spread: spread,
+            startVelocity: startVelocity,
+            color: colors[temp % colors.length],
+            shape: shapes[randomInt(0, shapes.length)],
+            ticks: ticks,
+            decay: decay,
+            gravity: gravity,
+            drift: drift,
+            scalar: scalar,
+            flat: flat
+          })
+        );
+      }
+
+      // if we have a previous canvas already animating,
+      // add to it
+      if (animationObj) {
+        return animationObj.addFettis(fettis);
+      }
+
+      animationObj = animate(canvas, fettis, resizer, size , done);
+
+      return animationObj.promise;
+    }
+
+    function fire(options) {
+      var disableForReducedMotion = globalDisableForReducedMotion || prop(options, 'disableForReducedMotion', Boolean);
+      var zIndex = prop(options, 'zIndex', Number);
+
+      if (disableForReducedMotion && preferLessMotion) {
+        return promise(function (resolve) {
+          resolve();
+        });
+      }
+
+      if (isLibCanvas && animationObj) {
+        // use existing canvas from in-progress animation
+        canvas = animationObj.canvas;
+      } else if (isLibCanvas && !canvas) {
+        // create and initialize a new canvas
+        canvas = getCanvas(zIndex);
+        document.body.appendChild(canvas);
+      }
+
+      if (allowResize && !initialized) {
+        // initialize the size of a user-supplied canvas
+        resizer(canvas);
+      }
+
+      var size = {
+        width: canvas.width,
+        height: canvas.height
+      };
+
+      if (worker && !initialized) {
+        worker.init(canvas);
+      }
+
+      initialized = true;
+
+      if (worker) {
+        canvas.__confetti_initialized = true;
+      }
+
+      function onResize() {
+        if (worker) {
+          // TODO this really shouldn't be immediate, because it is expensive
+          var obj = {
+            getBoundingClientRect: function () {
+              if (!isLibCanvas) {
+                return canvas.getBoundingClientRect();
+              }
+            }
+          };
+
+          resizer(obj);
+
+          worker.postMessage({
+            resize: {
+              width: obj.width,
+              height: obj.height
+            }
+          });
+          return;
+        }
+
+        // don't actually query the size here, since this
+        // can execute frequently and rapidly
+        size.width = size.height = null;
+      }
+
+      function done() {
+        animationObj = null;
+
+        if (allowResize) {
+          hasResizeEventRegistered = false;
+          global.removeEventListener('resize', onResize);
+        }
+
+        if (isLibCanvas && canvas) {
+          if (document.body.contains(canvas)) {
+            document.body.removeChild(canvas);
+          }
+          canvas = null;
+          initialized = false;
+        }
+      }
+
+      if (allowResize && !hasResizeEventRegistered) {
+        hasResizeEventRegistered = true;
+        global.addEventListener('resize', onResize, false);
+      }
+
+      if (worker) {
+        return worker.fire(options, size, done);
+      }
+
+      return fireLocal(options, size, done);
+    }
+
+    fire.reset = function () {
+      if (worker) {
+        worker.reset();
+      }
+
+      if (animationObj) {
+        animationObj.reset();
+      }
+    };
+
+    return fire;
+  }
+
+  // Make default export lazy to defer worker creation until called.
+  var defaultFire;
+  function getDefaultFire() {
+    if (!defaultFire) {
+      defaultFire = confettiCannon(null, { useWorker: true, resize: true });
+    }
+    return defaultFire;
+  }
+
+  function transformPath2D(pathString, pathMatrix, x, y, scaleX, scaleY, rotation) {
+    var path2d = new Path2D(pathString);
+
+    var t1 = new Path2D();
+    t1.addPath(path2d, new DOMMatrix(pathMatrix));
+
+    var t2 = new Path2D();
+    // see https://developer.mozilla.org/en-US/docs/Web/API/DOMMatrix/DOMMatrix
+    t2.addPath(t1, new DOMMatrix([
+      Math.cos(rotation) * scaleX,
+      Math.sin(rotation) * scaleX,
+      -Math.sin(rotation) * scaleY,
+      Math.cos(rotation) * scaleY,
+      x,
+      y
+    ]));
+
+    return t2;
+  }
+
+  function shapeFromPath(pathData) {
+    if (!canUsePaths) {
+      throw new Error('path confetti are not supported in this browser');
+    }
+
+    var path, matrix;
+
+    if (typeof pathData === 'string') {
+      path = pathData;
+    } else {
+      path = pathData.path;
+      matrix = pathData.matrix;
+    }
+
+    var path2d = new Path2D(path);
+    var tempCanvas = document.createElement('canvas');
+    var tempCtx = tempCanvas.getContext('2d');
+
+    if (!matrix) {
+      // attempt to figure out the width of the path, up to 1000x1000
+      var maxSize = 1000;
+      var minX = maxSize;
+      var minY = maxSize;
+      var maxX = 0;
+      var maxY = 0;
+      var width, height;
+
+      // do some line skipping... this is faster than checking
+      // every pixel and will be mostly still correct
+      for (var x = 0; x < maxSize; x += 2) {
+        for (var y = 0; y < maxSize; y += 2) {
+          if (tempCtx.isPointInPath(path2d, x, y, 'nonzero')) {
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+          }
+        }
+      }
+
+      width = maxX - minX;
+      height = maxY - minY;
+
+      var maxDesiredSize = 10;
+      var scale = Math.min(maxDesiredSize/width, maxDesiredSize/height);
+
+      matrix = [
+        scale, 0, 0, scale,
+        -Math.round((width/2) + minX) * scale,
+        -Math.round((height/2) + minY) * scale
+      ];
+    }
+
+    return {
+      type: 'path',
+      path: path,
+      matrix: matrix
+    };
+  }
+
+  function shapeFromText(textData) {
+    var text,
+        scalar = 1,
+        color = '#000000',
+        // see https://nolanlawson.com/2022/04/08/the-struggle-of-using-native-emoji-on-the-web/
+        fontFamily = '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "EmojiOne Color", "Android Emoji", "Twemoji Mozilla", "system emoji", sans-serif';
+
+    if (typeof textData === 'string') {
+      text = textData;
+    } else {
+      text = textData.text;
+      scalar = 'scalar' in textData ? textData.scalar : scalar;
+      fontFamily = 'fontFamily' in textData ? textData.fontFamily : fontFamily;
+      color = 'color' in textData ? textData.color : color;
+    }
+
+    // all other confetti are 10 pixels,
+    // so this pixel size is the de-facto 100% scale confetti
+    var fontSize = 10 * scalar;
+    var font = '' + fontSize + 'px ' + fontFamily;
+
+    var canvas = new OffscreenCanvas(fontSize, fontSize);
+    var ctx = canvas.getContext('2d');
+
+    ctx.font = font;
+    var size = ctx.measureText(text);
+    var width = Math.ceil(size.actualBoundingBoxRight + size.actualBoundingBoxLeft);
+    var height = Math.ceil(size.actualBoundingBoxAscent + size.actualBoundingBoxDescent);
+
+    var padding = 2;
+    var x = size.actualBoundingBoxLeft + padding;
+    var y = size.actualBoundingBoxAscent + padding;
+    width += padding + padding;
+    height += padding + padding;
+
+    canvas = new OffscreenCanvas(width, height);
+    ctx = canvas.getContext('2d');
+    ctx.font = font;
+    ctx.fillStyle = color;
+
+    ctx.fillText(text, x, y);
+
+    var scale = 1 / scalar;
+
+    return {
+      type: 'bitmap',
+      // TODO these probably need to be transfered for workers
+      bitmap: canvas.transferToImageBitmap(),
+      matrix: [scale, 0, 0, scale, -width * scale / 2, -height * scale / 2]
+    };
+  }
+
+  module.exports = function() {
+    return getDefaultFire().apply(this, arguments);
+  };
+  module.exports.reset = function() {
+    getDefaultFire().reset();
+  };
+  module.exports.create = confettiCannon;
+  module.exports.shapeFromPath = shapeFromPath;
+  module.exports.shapeFromText = shapeFromText;
+}((function () {
+  if (typeof window !== 'undefined') {
+    return window;
+  }
+
+  if (typeof self !== 'undefined') {
+    return self;
+  }
+
+  return this || {};
+})(), module, false));
+
+// end source content
+
+  window.confetti = module.exports;
+}(window, {}));
+
+</script>
+<script src="/vendor/supabase.js"></script>
+<script src="/js/db.js"></script>
+<script>
+const DAY = 86400000;
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const WD = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+/* swatch order runs warm to cool: more oranges and greens, fewer purples and blues */
+const PALETTE = [
+  {k:"coral",fill:"#FFA27F",ink:"#7A2A0E"},{k:"orange",fill:"#FFB070",ink:"#743200"},
+  {k:"apricot",fill:"#FFCB8E",ink:"#6B3D00"},{k:"yellow",fill:"#FFD95C",ink:"#5E4500"},
+  {k:"tan",fill:"#E6C29C",ink:"#5A3814"},{k:"sand",fill:"#DED6C3",ink:"#4B4330"},
+  {k:"slate",fill:"#BAC4D5",ink:"#2C3648"},{k:"olive",fill:"#D6D98A",ink:"#4A4C0B"},
+  {k:"lime",fill:"#C8E66A",ink:"#3C5300"},{k:"sage",fill:"#B9D7A1",ink:"#3A5222"},
+  {k:"green",fill:"#80D48C",ink:"#0E4A1A"},{k:"mint",fill:"#93E6CF",ink:"#0B5240"},
+  {k:"teal",fill:"#5FD0C6",ink:"#05453F"},{k:"cyan",fill:"#80D4F8",ink:"#064761"},
+  {k:"blue",fill:"#86BEFF",ink:"#0B3F7A"},{k:"indigo",fill:"#A3AAFF",ink:"#232C85"},
+  {k:"violet",fill:"#BBA6FF",ink:"#2E1F7A"},{k:"pink",fill:"#FF9EC4",ink:"#7D1640"}
+];
+/* older colours some saved data may still use; not offered as swatches */
+const LEGACY = [{k:"orchid",fill:"#E2A2F5",ink:"#5E1C78"},{k:"plum",fill:"#C69ADB",ink:"#45175C"}];
+const colorOf = k => PALETTE.find(p => p.k === k) || LEGACY.find(p => p.k === k) || PALETTE[0];
+/* the team: who can be assigned to tasks and given time away. ini = initials shown in the circle */
+const TEAM = [
+  {name:"Matt", ini:"MG", color:"blue"}, {name:"Jesse", ini:"JW", color:"violet"}, {name:"Jay", ini:"JP", color:"teal"},
+  {name:"Anissa", ini:"AM", color:"pink"}, {name:"Anna", ini:"AN", color:"green"}, {name:"Dipesh", ini:"DS", color:"yellow"},
+  {name:"Sofia", ini:"SP", color:"slate"}
+];
+const TEAM_NAMES = TEAM.map(p => p.name);
+const person = n => TEAM.find(p => p.name === n);
+/* bars are coloured by the person doing the task. Reds and oranges are kept for warnings (late, launch, clashes)
+   and sand is too close to the grey used for shared tasks, so those aren't offered as people's colours */
+const NOT_FOR_PEOPLE = ["coral", "orange", "apricot", "sand"];
+const PERSON_PALETTE = () => PALETTE.filter(p => !NOT_FOR_PEOPLE.includes(p.k));
+const SHARED = {k:"shared", fill:"#DAD8D3", ink:"#3E3D45"};
+function personColorKey(n){ const o = (S.settings.personColors || {})[n]; const p = person(n); return o || (p ? p.color : "slate"); }
+const personColor = n => colorOf(personColorKey(n));
+/* older tasks stored one free-text owner; "Team" meant the review trio */
+const LEGACY_TEAM = ["Anissa","Matt","Jesse"];
+function ownersOf(t){
+  if (!t) return [];
+  if (Array.isArray(t.owners)) return TEAM_NAMES.filter(n => t.owners.includes(n));
+  const o = (t.owner || "").trim();
+  if (o.toLowerCase() === "team") return LEGACY_TEAM.slice();
+  return TEAM_NAMES.filter(n => n.toLowerCase() === o.toLowerCase());
+}
+const STATUS = {todo:{label:"Not Started",icon:"radio_button_unchecked"},doing:{label:"In Progress",icon:"timelapse"},done:{label:"Done",icon:"check_circle"}};
+const NEXT_STATUS = {todo:"doing",doing:"done",done:"todo"};
+/* checklist: an optional list of sub-tasks on a task, stored as {title, items:[{id, text, done}]} */
+const clOf = t => t && t.checklist && Array.isArray(t.checklist.items) ? t.checklist : null;
+function clProgress(t){ const c = clOf(t); if (!c || !c.items.length) return null; const d = c.items.filter(i => i.done).length; return {done:d, total:c.items.length, full:d === c.items.length}; }
+const clPill = p => `<span class="clpill ${p.full ? "full" : ""}" title="Checklist: ${p.done} of ${p.total} done"><span class="ms">${p.full ? "task_alt" : "checklist"}</span>${p.done}/${p.total}</span>`;
+
+const parse = s => Date.UTC(+s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10));
+const fmt = ms => new Date(ms).toISOString().slice(0,10);
+const addDays = (s,n) => fmt(parse(s) + n*DAY);
+const diff = (a,b) => Math.round((parse(b) - parse(a)) / DAY);
+const nice = s => { const d = new Date(parse(s)); return `${WD[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
+const short = s => { const d = new Date(parse(s)); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
+const range = (a,b) => { if (!a || !b) return "No dates"; const A = new Date(parse(a)), B = new Date(parse(b)); if (a === b) return short(a); return A.getUTCMonth() === B.getUTCMonth() ? `${A.getUTCDate()}–${B.getUTCDate()} ${MONTHS[B.getUTCMonth()]}` : `${short(a)} – ${short(b)}`; };
+const plural = (n, w, pl) => `${n} ${n === 1 ? w : (pl || w + "s")}`;
+const now = new Date();
+const TODAY = fmt(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+/* capitalise each all-lowercase word, leave words like "iPad" or "VO" alone */
+const titleCase = s => String(s).replace(/(^|[\s(\-\/])([a-z][^\s(\-\/]*)/g, (m, a, w) => a + (w === w.toLowerCase() ? w[0].toUpperCase() + w.slice(1) : w));
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
+const store = {
+  get(k, d){ try { const v = localStorage.getItem("s2gantt:" + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("s2gantt:" + k, JSON.stringify(v)); } catch(e){} }
+};
+
+const S = {
+  cats: new Map(), tasks: new Map(), away: new Map(), settings: {launch:"2026-12-18", title:"Series 2"},
+  loaded: {c:false, t:false}, db: null, canWrite: true, openAway: null,
+  zoom: store.get("zoom", "week"), collapsed: new Set(store.get("collapsed", [])),
+  summary: "", log: [], notesOpen: false, editingSummary: false,
+  openId: null, selId: null, selAway: null, selPerson: null, openPerson: null, listNarrow: store.get("listNarrow", false), preview: null, test: null, dragging: false, r0: 0, days: 0, scrolled: false
+};
+const H = {undo: [], redo: []};
+/* only touch the DOM when the markup really changed, so the element under the mouse isn't swapped out (stops cursor flicker) */
+function setHTML(el, html){ if (el._html === html) return false; el.innerHTML = html; el._html = html; return true; }
+const dayW = () => S.zoom === "week" ? 34 : 12;
+
+/* ---------- reading ---------- */
+const catsSorted = () => [...S.cats.values()].sort((a,b) => (a.order ?? 0) - (b.order ?? 0));
+/* sub-categories live on their category as subs:[{id, name}]; a task points at one with task.sub */
+const subsOf = c => c && Array.isArray(c.subs) ? c.subs : [];
+/* a category's tasks in the order they show: each sub-category's tasks, then the tasks that sit straight under the category */
+function groupsOf(cid){
+  const subs = subsOf(S.cats.get(cid)), known = new Set(subs.map(x => x.id)), ts = tasksOf(cid);
+  return [...subs.map(sub => ({sub, tasks:ts.filter(t => t.sub === sub.id)})), {sub:null, tasks:ts.filter(t => !t.sub || !known.has(t.sub))}];
+}
+const tasksOf = cid => [...S.tasks.values()].filter(t => t.cat === cid).sort((a,b) => (a.order ?? 0) - (b.order ?? 0));
+const real = t => ({start:t.start || null, end:t.end || null});
+function eff(t){
+  if (S.preview && S.preview.changes.has(t.id)) return S.preview.changes.get(t.id);
+  if (S.test && S.test.changes.has(t.id)) return S.test.changes.get(t.id);
+  return real(t);
+}
+/* time away: test mode can move leave without touching the real plan */
+const realAway = a => ({start:a.start || null, end:a.end || null});
+function effAway(a){ if (S.test && S.test.away.has(a.id)) return S.test.away.get(a.id); return realAway(a); }
+function awayDiff(){
+  if (!S.test) return null;
+  const m = new Map();
+  for (const [id, to] of S.test.away){ const a = S.away.get(id); if (!a) continue; const from = realAway(a); if (from.start !== to.start || from.end !== to.end) m.set(id, {from, to}); }
+  return m;
+}
+/* leave grouped by person, using test-mode dates (or the real ones when useReal) */
+function leavesByPerson(useReal){
+  const m = new Map(TEAM_NAMES.map(n => [n, []]));
+  for (const a of S.away.values()){
+    const e = useReal ? realAway(a) : effAway(a);
+    if (!e.start || !e.end || !m.has(a.person)) continue;
+    m.get(a.person).push({id:a.id, person:a.person, note:a.note || "", start:e.start, end:e.end});
+  }
+  return m;
+}
+/* every stretch of a task that falls while someone assigned to it is away */
+function clashesFor(t, e, lbp){
+  if (!e || !e.start || !e.end) return [];
+  const out = [];
+  for (const p of ownersOf(t)) for (const a of lbp.get(p) || []){
+    const from = a.start > e.start ? a.start : e.start, to = a.end < e.end ? a.end : e.end;
+    if (from <= to) out.push({person:p, leave:a, from, to, days:diff(from, to) + 1});
+  }
+  return out.sort((x, y) => x.from.localeCompare(y.from));
+}
+function countClashes(useReal){
+  const lbp = leavesByPerson(useReal); let n = 0;
+  for (const t of S.tasks.values()) if (t.status !== "done" && clashesFor(t, useReal ? real(t) : eff(t), lbp).length) n++;
+  return n;
+}
+/* the nearest dates, keeping the task's length, where nobody on it is away. dir 1 = after, -1 = before */
+function clearOfLeave(t, dir){
+  const e = eff(t); if (!e.start || !e.end) return null;
+  const len = diff(e.start, e.end), lbp = leavesByPerson();
+  let s = e.start, en = e.end;
+  for (let g = 0; g < 60; g++){
+    const c = clashesFor(t, {start:s, end:en}, lbp);
+    if (!c.length) return {start:s, end:en};
+    if (dir > 0){ const m = c.reduce((m, x) => x.leave.end > m ? x.leave.end : m, c[0].leave.end); s = addDays(m, 1); en = addDays(s, len); }
+    else { const m = c.reduce((m, x) => x.leave.start < m ? x.leave.start : m, c[0].leave.start); en = addDays(m, -1); s = addDays(en, -len); }
+  }
+  return null;
+}
+/* milestones: key dates drawn as lines. One is the main launch (orange, used for the countdown).
+   Each milestone can apply to everything or one category, or be a plain marker line with no warnings (milestones once tied to a tag are now markers); tasks it applies to are flagged
+   if they finish after it (finishing on the day is fine) */
+function milestones(){
+  const m = Array.isArray(S.settings.milestones) && S.settings.milestones.length ? S.settings.milestones : [{id:"launch", name:"Launch", date:S.settings.launch || null, main:true, cat:null, tag:null}];
+  return m.filter(x => x.date).slice().sort((a, b) => a.date.localeCompare(b.date));
+}
+const mainMilestone = () => milestones().find(m => m.main) || null;
+const isMarker = m => !!(m.marker || m.tag);
+const inScope = (t, m) => !isMarker(m) && (!m.cat || t.cat === m.cat);
+function scopeLabel(m){ if (isMarker(m)) return "Marker Only"; if (!m.cat) return "Everything"; const c = S.cats.get(m.cat); const cn = c ? titleCase(c.name) : "A Deleted Category"; return m.tag ? `${cn} · ${m.tag}` : cn; }
+const idx = s => Math.round((parse(s) - S.r0) / DAY);
+function diffMap(){
+  const src = S.preview ? S.preview.changes : S.test ? S.test.changes : null;
+  if (!src) return null;
+  const m = new Map();
+  for (const [id, to] of src){ const t = S.tasks.get(id); if (!t) continue; const from = real(t); if (from.start !== to.start || from.end !== to.end) m.set(id, {from, to}); }
+  return m;
+}
+
+/* the chart starts on the earliest task's start date (or today, if that's earlier) */
+function computeRange(){
+  /* always leave a few months of room on the right, so time away can be planned past the last task */
+  let min = parse(TODAY), max = Math.max(parse(TODAY) + 100*DAY, ...milestones().map(m => parse(m.date) + 14*DAY));
+  for (const t of S.tasks.values()) for (const e of [eff(t), real(t)]) if (e.start && e.end){ min = Math.min(min, parse(e.start)); max = Math.max(max, parse(e.end) + 10*DAY); }
+  for (const a of S.away.values()) for (const e of [effAway(a), realAway(a)]) if (e.start && e.end){ min = Math.min(min, parse(e.start)); max = Math.max(max, parse(e.end) + 10*DAY); }
+  /* start one day earlier, or more if needed, so the initials just left of the earliest bars aren't cut off (month view has narrower days) */
+  let pad = min - DAY;
+  for (const t of S.tasks.values()){ const n = ownersOf(t).length; if (!n) continue; const need = Math.ceil((16 + (n - 1) * 10 + 7) / dayW()) * DAY; for (const e of [eff(t), real(t)]) if (e.start) pad = Math.min(pad, parse(e.start) - need); }
+  min = pad;
+  max += (6 - (new Date(max).getUTCDay() + 6) % 7) * DAY;
+  S.r0 = min; S.days = Math.round((max - min) / DAY) + 1;
+  S.off = (new Date(min).getUTCDay() + 6) % 7;
+}
+
+function computeFlags(){
+  const late = new Set(), blocked = new Set(), conflict = new Map(), clash = new Map(), past = new Map();
+  const ms = milestones();
+  for (const t of S.tasks.values()){ if (t.status === "done") continue; const e = eff(t); if (!e.end) continue; const hit = ms.filter(m => inScope(t, m) && e.end > m.date); if (hit.length) past.set(t.id, hit); }
+  const lbp = leavesByPerson();
+  for (const t of S.tasks.values()){ if (t.status === "done") continue; const c = clashesFor(t, eff(t), lbp); if (c.length) clash.set(t.id, c); }
+  for (const t of S.tasks.values()){ const e = eff(t); if (e.end && e.end < TODAY && t.status !== "done") late.add(t.id); }
+  const memo = new Map();
+  const upLate = (id, seen) => {
+    if (memo.has(id)) return memo.get(id);
+    if (seen.has(id)) return false; seen.add(id);
+    const t = S.tasks.get(id); let r = false;
+    for (const d of (t && t.deps) || []){ if (!S.tasks.has(d)) continue; if (late.has(d) || upLate(d, seen)){ r = true; break; } }
+    memo.set(id, r); return r;
+  };
+  for (const t of S.tasks.values()){
+    if (t.status === "done") continue;
+    if (!late.has(t.id) && upLate(t.id, new Set())) blocked.add(t.id);
+    const e = eff(t);
+    if (e.start) for (const d of t.deps || []){ const dt = S.tasks.get(d); if (!dt) continue; const de = eff(dt); if (de.end && e.start <= de.end && dt.status !== "done"){ conflict.set(t.id, dt); break; } }
+  }
+  return {late, blocked, conflict, clash, past};
+}
+const dependentsOf = id => [...S.tasks.values()].filter(t => (t.deps || []).includes(id));
+function wouldCycle(taskId, depId){
+  const stack = [depId], seen = new Set();
+  while (stack.length){ const id = stack.pop(); if (id === taskId) return true; if (seen.has(id)) continue; seen.add(id); const t = S.tasks.get(id); for (const d of (t && t.deps) || []) stack.push(d); }
+  return false;
+}
+/* push later anything that would start before a task it waits on has finished */
+function cascade(originId, s, e, base){
+  const ch = new Map([[originId, {start:s, end:e}]]);
+  const q = [originId]; let guard = 0;
+  while (q.length && guard++ < 5000){
+    const id = q.shift(), cur = ch.get(id);
+    for (const t of S.tasks.values()){
+      if (!(t.deps || []).includes(id) || t.status === "done") continue;
+      const tc = ch.get(t.id) || base(t);
+      if (!tc.start || !tc.end) continue;
+      const min = addDays(cur.end, 1);
+      if (tc.start < min){ const sh = diff(tc.start, min); ch.set(t.id, {start:addDays(tc.start, sh), end:addDays(tc.end, sh)}); q.push(t.id); }
+    }
+  }
+  return ch;
+}
+
+/* ---------- writing, with undo history ---------- */
+const COLL = {task:"tasks", cat:"categories", settings:"settings", away:"away"};
+const mapOf = kind => kind === "task" ? S.tasks : kind === "away" ? S.away : S.cats;
+const clone = o => o == null ? null : JSON.parse(JSON.stringify(o));
+function getDoc(kind, id){
+  if (kind === "settings") return clone(S.settings);
+  const v = mapOf(kind).get(id); if (!v) return null;
+  const {id:_, ...rest} = v; return clone(rest);
+}
+const queues = new Map();
+/* the data layer (js/db.js) keeps writes to one document in order, so each write is handed over straight away */
+function enqueue(path, fn){ let p; try { p = fn(); } catch(e){ p = Promise.reject(e); } return Promise.resolve(p).catch(onWriteError); }
+function applyDoc(kind, id, data){
+  if (kind === "settings") S.settings = {...data};
+  else if (data === null) mapOf(kind).delete(id);
+  else mapOf(kind).set(id, {id, ...clone(data)});
+  if (S.db){ const path = COLL[kind] + "/" + id; const body = clone(data); enqueue(path, () => body === null ? S.db.doc(path).delete() : S.db.doc(path).set(body)); }
+}
+let TX = null;
+function act(label, fn){
+  const outer = !TX; if (outer) TX = {label, ops:[]};
+  try { fn(); } finally {
+    if (outer){ const t = TX; TX = null; if (t.ops.length){ H.undo.push(t); if (H.undo.length > 200) H.undo.shift(); H.redo.length = 0; } render(); }
+  }
+}
+function put(kind, id, data){
+  const before = getDoc(kind, id);
+  if (JSON.stringify(before) === JSON.stringify(data)) return;
+  if (!TX) return act("Change", () => put(kind, id, data));
+  TX.ops.push({kind, id, before, after:clone(data)});
+  applyDoc(kind, id, data);
+}
+function patchTask(id, patch){ const cur = getDoc("task", id); if (cur) put("task", id, {...cur, ...patch}); }
+function patchCat(id, patch){ const cur = getDoc("cat", id); if (cur) put("cat", id, {...cur, ...patch}); }
+function patchAway(id, patch){ const cur = getDoc("away", id); if (cur) put("away", id, {...cur, ...patch}); }
+/* owners are stored as a list; the old single owner field is dropped on the first change */
+const setOwners = (id, list) => patchTask(id, {owners:TEAM_NAMES.filter(n => list.includes(n)), owner:undefined});
+function undo(){
+  if (S.test){ testUndo(); return; }
+  if (S.preview){ S.preview = null; render(); return; }
+  const t = H.undo.pop(); if (!t){ toast("Nothing to undo"); return; }
+  for (const op of [...t.ops].reverse()) applyDoc(op.kind, op.id, op.before);
+  H.redo.push(t); render(); toast(`Undone: ${t.label}`);
+}
+function redo(){
+  if (S.test || S.preview) return;
+  const t = H.redo.pop(); if (!t){ toast("Nothing to redo"); return; }
+  for (const op of t.ops) applyDoc(op.kind, op.id, op.after);
+  H.undo.push(t); render(); toast(`Redone: ${t.label}`);
+}
+function onWriteError(err){
+  if (err && (err.code === "invalid_argument" || err.code === "revoked" || err.code === "not_granted")){
+    if (S.canWrite){ S.canWrite = false; document.body.classList.add("readonly"); toast("You can view this plan but can't change it."); }
+  } else if (err && err.code === "quota_exceeded") toast("The plan is full. Delete some tasks to add more.");
+  else toast("Couldn't save that change. Check your connection and try again.");
+}
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const nextOrder = cid => Math.max(0, ...tasksOf(cid).map(t => t.order ?? 0)) + 1;
+function removeTask(id){
+  for (const t of S.tasks.values()) if ((t.deps || []).includes(id)) patchTask(t.id, {deps:t.deps.filter(d => d !== id)});
+  put("task", id, null);
+  if (S.openId === id){ S.openId = null; $("drawer").classList.remove("open"); }
+}
+
+/* ---------- render ---------- */
+function render(){
+  if (S.dragging) return;
+  const board = $("board");
+  document.documentElement.style.setProperty("--day", dayW() + "px");
+  document.body.classList.toggle("testing", !!S.test);
+  $("testBtn").classList.toggle("on", !!S.test);
+  setHTML($("testBtn"), S.test ? `<span class="ms">close</span>Exit Test Mode` : `<span class="ms">science</span>Test Mode`);
+  document.body.classList.add("compact");
+  document.body.classList.toggle("narrow", !!S.listNarrow);
+  $("viewLbl").textContent = S.zoom === "month" ? "Month" : "Week";
+  $("zWeek").classList.toggle("on", S.zoom === "week");
+  $("zMonth").classList.toggle("on", S.zoom === "month");
+  $("title").textContent = `${S.settings.title || "S2"} Launch Plan`;
+  renderOwners();
+  if (!S.db && S.dbFailed){ board.innerHTML = `<div class="empty"><span class="ms" style="font-size:40px">cloud_off</span><h2>Couldn't Load The Plan</h2><p>Check your internet connection, then reload the page.</p></div>`; return; }
+  if (!S.loaded.c || !S.loaded.t) return;
+  const flags = computeFlags(), changes = diffMap();
+  renderStats(flags);
+  const cats = catsSorted();
+  if (!cats.length){
+    board.innerHTML = `<div class="empty"><span class="ms" style="font-size:40px">add_task</span><h2>Nothing Planned Yet</h2><p>Start with a category, like Story Writing or Games, then add tasks under it.</p><button class="btn primary" data-act="add-cat"><span class="ms">add</span>Add A Category</button></div>`;
+    renderDrawer(flags); renderSheet(); return;
+  }
+  const prevLeft = board.scrollLeft, prevTop = board.scrollTop, prevR0 = S.r0;
+  computeRange();
+  const W = dayW(), trackW = S.days * W;
+  const rel = new Set();
+  const fid = S.openId || S.selId, faw = S.openAway || S.selAway;
+  if (fid && S.tasks.has(fid) && !(changes && changes.size)){ for (const d of S.tasks.get(fid).deps || []) rel.add(d); for (const t of dependentsOf(fid)) rel.add(t.id); }
+  if (faw) for (const [tid, cs] of flags.clash) if (cs.some(c => c.leave.id === faw)) rel.add(tid);
+  const fp = S.openPerson || S.selPerson;
+  if (fp) for (const [tid, cs] of flags.clash) if (cs.some(c => c.person === fp)) rel.add(tid);
+  const focus = changes && changes.size;
+  let h = `<div class="grid ${S.zoom} ${focus ? "focus" : ""}" id="grid" style="width:calc(var(--label-w) + ${trackW}px);--off:${S.off}">`;
+  h += `<div class="row head"><div class="label"><span class="headname">Tasks</span><button class="headadd" id="addCat" data-act="add-cat" title="Add a category" aria-label="Add a category"><span class="ms">add</span><span class="lbl">Category</span></button><button class="icon-btn listtog" data-act="toggle-list" title="${S.listNarrow ? "Widen the task list" : "Narrow the task list to see more of the chart"}" aria-label="${S.listNarrow ? "Widen task list" : "Narrow task list"}"><span class="ms">${S.listNarrow ? "keyboard_double_arrow_right" : "keyboard_double_arrow_left"}</span></button></div><div class="track" style="width:${trackW}px">${headHTML(W)}</div></div>`;
+  h += awayMiniHTML(W, trackW);
+  h += awayHTML(W, trackW, flags);
+  for (const c of cats){
+    const col = colorOf(c.color), ts = tasksOf(c.id);
+    const shown = ts;
+    const hasChange = focus && ts.some(t => changes.has(t.id));
+    const collapsed = S.collapsed.has(c.id) && !hasChange;
+    const sched = ts.map(eff).filter(e => e.start && e.end);
+    let sum = "";
+    if (sched.length){ const a = sched.reduce((m,e) => e.start < m ? e.start : m, sched[0].start), b = sched.reduce((m,e) => e.end > m ? e.end : m, sched[0].end); sum = `<div class="sum" style="left:${idx(a)*W+2}px;width:${(diff(a,b)+1)*W-4}px;background:#CFCDC8"></div>`; }
+    h += `<div class="row cat ${collapsed ? "collapsed" : ""}" data-cat="${c.id}">
+      <div class="label">
+        <button class="icon-btn tog" data-act="toggle" aria-label="${collapsed ? "Expand" : "Collapse"} ${esc(titleCase(c.name))}" aria-expanded="${!collapsed}"><span class="ms">expand_more</span></button>
+        <button class="cat-name" data-act="toggle">${esc(titleCase(c.name))}</button>
+        <span class="count" title="${plural(ts.length, "task")}">${ts.length}</span>
+        <span class="acts">
+          <span class="icon-btn drag-h" title="Drag to reorder categories"><span class="ms">drag_indicator</span></span>
+          <button class="icon-btn" data-act="edit-cat" title="Rename category" aria-label="Edit category"><span class="ms">edit</span></button>
+          <button class="icon-btn" data-act="del-cat" title="Delete category" aria-label="Delete category"><span class="ms">delete</span></button>
+        </span>
+      </div>
+      <div class="track" style="width:${trackW}px">${sum}</div></div>`;
+    if (collapsed) continue;
+    const rowOf = (t, sid) => {
+      const e = eff(t), st = STATUS[t.status] || STATUS.todo, isLate = flags.late.has(t.id), chg = focus && changes.get(t.id);
+      const unsched = !(e.start && e.end);
+      h += `<div class="row task ${t.status === "done" ? "isdone" : ""} ${unsched ? "unsched" : ""} ${(S.openId || S.selId) === t.id ? "sel" : ""} ${chg ? "chg" : ""} ${sid ? "insub" : ""}" data-task="${t.id}" data-cid="${c.id}" data-sub="${sid}">
+        <div class="label">
+          <button class="status ${t.status || "todo"}" data-act="cycle" title="${st.label}. Click to change" aria-label="Status: ${st.label}. Change"><span class="ms">${st.icon}</span></button>
+          <button class="tname" data-act="open" title="${esc(titleCase(t.name))}">${esc(titleCase(t.name))}</button>
+          ${tagPills(t, c)}
+          ${isLate ? `<span class="dot-late" title="Late"></span>` : flags.clash.has(t.id) ? `<span class="dot-clash" title="Someone on this task is away during it"></span>` : ""}
+          <button class="icon-btn row-del" data-act="del-task" title="Delete task" aria-label="Delete task"><span class="ms">delete</span></button>
+        </div>
+        <div class="track ${unsched ? "placeable" : ""}" style="width:${trackW}px" ${unsched ? `data-place="${t.id}" title="Drag across days to set this task's dates"` : ""}>`;
+      if (chg && chg.from.start && chg.from.end) h += `<div class="ghost" style="left:${idx(chg.from.start)*W+2}px;width:${(diff(chg.from.start, chg.from.end)+1)*W-4}px">${W > 20 ? "Now" : ""}</div>`;
+      if (unsched){
+        h += `<div class="unsched-hint" style="left:${Math.max(0, idx(TODAY)*W + 10)}px"><span class="ms" style="font-size:16px">event_busy</span>No Dates Yet<span class="more">. Drag across days to set them</span></div>`;
+      } else {
+        h += barHTML(t, barColor(t), e, flags, rel, chg);
+        if (chg) h += deltaHTML(chg, W);
+      }
+      h += `</div></div>`;
+    };
+    for (const g of groupsOf(c.id)){
+      if (!g.sub){ g.tasks.forEach(t => rowOf(t, "")); continue; }
+      const sn = esc(titleCase(g.sub.name)), sc = S.collapsed.has(c.id + "/" + g.sub.id) && !(focus && g.tasks.some(t => changes.has(t.id)));
+      const ss = g.tasks.map(eff).filter(e => e.start && e.end);
+      let ssum = "";
+      if (ss.length){ const a = ss.reduce((m,e) => e.start < m ? e.start : m, ss[0].start), b = ss.reduce((m,e) => e.end > m ? e.end : m, ss[0].end); ssum = `<div class="sum" style="left:${idx(a)*W+2}px;width:${(diff(a,b)+1)*W-4}px;background:#CFCDC8"></div>`; }
+      h += `<div class="row cat subcat ${sc ? "collapsed" : ""}" data-cat="${c.id}" data-sub="${g.sub.id}">
+        <div class="label">
+          <button class="icon-btn tog" data-act="toggle-sub" aria-label="${sc ? "Expand" : "Collapse"} ${sn}" aria-expanded="${!sc}"><span class="ms">expand_more</span></button>
+          <button class="cat-name" data-act="toggle-sub">${sn}</button>
+          <span class="count" title="${plural(g.tasks.length, "task")}">${g.tasks.length}</span>
+          <span class="acts">
+            <span class="icon-btn drag-h" title="Drag to reorder sub-categories"><span class="ms">drag_indicator</span></span>
+            <button class="icon-btn" data-act="edit-sub" title="Rename sub-category" aria-label="Rename ${sn}"><span class="ms">edit</span></button>
+            <button class="icon-btn" data-act="del-sub" title="Remove sub-category. Its tasks stay in the category" aria-label="Remove ${sn}"><span class="ms">delete</span></button>
+          </span>
+        </div>
+        <div class="track" style="width:${trackW}px">${ssum}</div></div>`;
+      if (sc) continue;
+      g.tasks.forEach(t => rowOf(t, g.sub.id));
+      if (!S.test) h += `<div class="row task addrow insub" data-cat="${c.id}" data-sub="${g.sub.id}"><div class="label"><button class="status" data-act="add-task" aria-label="Add a task to ${sn}"><span class="ms">add</span></button><button class="tname" data-act="add-task">Add Task</button></div><div class="track" style="width:${trackW}px"></div></div>`;
+    }
+    if (!S.test) h += `<div class="row task addrow" data-cat="${c.id}"><div class="label"><button class="status" data-act="add-task" aria-label="Add a task to ${esc(titleCase(c.name))}"><span class="ms">add</span></button><button class="tname" data-act="add-task">Add Task</button><button class="addsub" data-act="add-sub" title="Add a sub-category to group tasks, like one per episode"><span class="ms">create_new_folder</span><span class="lbl">Sub-Category</span></button></div><div class="track" style="width:${trackW}px"></div></div>`;
+  }
+  const ti = idx(TODAY);
+  if (ti >= 0 && ti < S.days) h += `<div class="vline today" style="left:calc(var(--label-w) + ${ti*W + W/2 - 1}px)"></div>`;
+  for (const m of milestones()){ const mi = idx(m.date); if (mi >= 0 && mi < S.days) h += `<div class="vline ${m.main ? "launch" : "ms"}" style="left:calc(var(--label-w) + ${mi*W + W/2 - 1}px)"></div>`; }
+  h += `</div>`;
+  if (setHTML(board, h)){
+    if (!S.scrolled){ S.scrolled = true; scrollToDate(TODAY); }
+    else { board.scrollLeft = prevLeft + (prevR0 && prevR0 !== S.r0 ? Math.round((prevR0 - S.r0) / DAY) * W : 0); board.scrollTop = prevTop; }
+    updateAwayMini(true);
+  }
+  renderDrawer(flags); renderSheet(); renderSelChip();
+}
+/* selecting a bar highlights it without opening details, so the chart stays in view */
+function renderSelChip(){
+  const sp = S.selPerson && !S.openPerson && !S.preview && !S.test && S.selPerson;
+  if (sp){
+    const n = personClashes(sp).length;
+    setHTML($("selchip"), `<div class="selchip" role="status"><span class="dotsel"></span><span class="sname">${esc(sp)}</span><span class="smuted">${plural(n, "Clash", "Clashes")} Highlighted</span>
+      <button class="btn" data-act="sel-open"><span class="ms">open_in_new</span>Open Details</button>
+      <button class="btn" data-act="sel-clear" aria-label="Close"><span class="ms">close</span>Close</button></div>`);
+    return;
+  }
+  const a = S.selAway && !S.openAway && !S.preview && !S.test && S.away.get(S.selAway);
+  if (a){
+    const e = realAway(a), n = [...computeFlags().clash.values()].filter(cs => cs.some(c => c.leave.id === a.id)).length;
+    setHTML($("selchip"), `<div class="selchip" role="status"><span class="dotsel"></span><span class="sname">${esc(a.person)} Away${a.note ? ` (${esc(a.note)})` : ""}</span><span class="smuted">${range(e.start, e.end)}${n ? ` · Clashes With ${plural(n, "Task")}` : ""}</span>
+      <button class="btn" data-act="sel-open"><span class="ms">open_in_new</span>Open Details</button>
+      <button class="btn" data-act="sel-clear" aria-label="Close"><span class="ms">close</span>Close</button></div>`);
+    return;
+  }
+  const t = S.selId && !S.openId && !S.preview && !S.test && S.tasks.get(S.selId);
+  const tp = t && clProgress(t);
+  setHTML($("selchip"), t ? `<div class="selchip" role="status"><span class="dotsel"></span><span class="sname">${esc(titleCase(t.name))}</span>${tp ? clPill(tp) : `<span class="smuted">Selected</span>`}
+    <button class="btn" data-act="sel-open"><span class="ms">open_in_new</span>Open Details</button>
+    <button class="btn" data-act="sel-clear" aria-label="Close"><span class="ms">close</span>Close</button></div>` : "");
+}
+let lastBarClick = {id:null, at:0};
+function selectTask(id){ S.selId = id; S.selAway = null; S.selPerson = null; S.selAt = Date.now(); render(); }
+function selectAway(id){ S.selAway = id; S.selId = null; S.selPerson = null; S.selAt = Date.now(); render(); }
+function clearSelection(){ if (!S.selId && !S.selAway && !S.selPerson) return; S.selId = null; S.selAway = null; S.selPerson = null; render(); }
+/* a person's clashing tasks, earliest first */
+function personClashes(name, flags){
+  const out = [];
+  for (const [tid, cs] of (flags || computeFlags()).clash) for (const c of cs) if (c.person === name) out.push({t:S.tasks.get(tid), c});
+  return out.sort((x, y) => x.c.from.localeCompare(y.c.from) || (x.t.order ?? 0) - (y.t.order ?? 0));
+}
+/* scroll the chart so all of a person's clashing tasks are in view, or the first one if they don't all fit */
+function showClashes(name){
+  const hits = personClashes(name); if (!hits.length) return;
+  let opened = false;
+  for (const {t} of hits) for (const k of [t.cat, t.cat + "/" + t.sub]) if (S.collapsed.has(k)){ S.collapsed.delete(k); opened = true; }
+  if (opened) store.set("collapsed", [...S.collapsed]);
+  S.openId = null; S.openAway = null; S.openPerson = null; $("drawer").classList.remove("open");
+  S.selPerson = name; S.selId = null; S.selAway = null; S.selAt = Date.now();
+  render();
+  const b = $("board"), labelW = b.querySelector(".head .label").offsetWidth, headH = b.querySelector(".row.head").offsetHeight, m = 24;
+  const boxes = [];
+  for (const {t, c} of hits){
+    const bar = b.querySelector(`[data-bar="${t.id}"]`); if (!bar) continue;
+    const row = bar.closest(".row"), x0 = labelW + bar.offsetLeft + (diff(eff(t).start, c.from)) * dayW();
+    boxes.push({x0, x1:x0 + (c.days * dayW()), y0:row.offsetTop, y1:row.offsetTop + row.offsetHeight});
+  }
+  if (!boxes.length) return;
+  const viewW = b.clientWidth - labelW - 2*m, viewH = b.clientHeight - headH - 2*m;
+  const all = boxes.reduce((u, x) => ({x0:Math.min(u.x0, x.x0), x1:Math.max(u.x1, x.x1), y0:Math.min(u.y0, x.y0), y1:Math.max(u.y1, x.y1)}), boxes[0]);
+  const fits = all.x1 - all.x0 <= viewW && all.y1 - all.y0 <= viewH;
+  const box = fits ? all : boxes[0];
+  /* centre the box in the visible chart area (right of the task list, under the dates) */
+  const left = (box.x0 + box.x1) / 2 - labelW - (b.clientWidth - labelW) / 2;
+  const top = (box.y0 + box.y1) / 2 - headH - (b.clientHeight - headH) / 2;
+  b.scrollTo({left:Math.max(0, Math.round(left)), top:Math.max(0, Math.round(top)), behavior:"smooth"});
+  if (!fits) toast(`${name} has ${plural(hits.length, "clash", "clashes")}. Showing the first one.`);
+}
+function openPerson(name, expandId){ if (S.notesOpen){ S.notesOpen = false; $("notes").classList.remove("open"); } S.openId = null; S.openAway = expandId || null; S.selId = null; S.selAway = null; S.selPerson = null; S.openPerson = name; render(); $("drawer").classList.add("open"); }
+
+function headHTML(W){
+  let h = "", i = 0;
+  while (i < S.days){
+    const d0 = new Date(S.r0 + i*DAY), m = d0.getUTCMonth(), y = d0.getUTCFullYear();
+    let j = i; while (j < S.days && new Date(S.r0 + j*DAY).getUTCMonth() === m) j++;
+    h += `<div class="m" style="left:${i*W}px;width:${(j-i)*W}px"><span>${MONTHS[m]}${S.zoom === "month" || m === 0 || i === 0 ? " " + y : ""}</span></div>`;
+    i = j;
+  }
+  for (let k = 0; k < S.days; k++){
+    const d = new Date(S.r0 + k*DAY), ds = fmt(S.r0 + k*DAY), dow = d.getUTCDay();
+    if (S.zoom === "week") h += `<div class="d ${dow === 0 || dow === 6 ? "we" : ""} ${ds === TODAY ? "today" : ""}" style="left:${k*W}px;width:${W}px"><b>${WD[dow][0]}</b><span>${d.getUTCDate()}</span></div>`;
+    else if (dow === 1 || k === 0) h += `<div class="wk" style="left:${k*W}px;width:${(dow === 1 ? 7 : (8 - dow) % 7)*W}px">${d.getUTCDate()}</div>`;
+  }
+  const ti = idx(TODAY);
+  if (ti >= 0 && ti < S.days) h += `<span class="vtag today" style="left:${ti*W + W/2}px">Today</span>`;
+  /* labels that would overlap shrink to just their icon (name on hover); if even the icons would touch, the later one drops to the other header row */
+  const items = milestones().map(m => ({m, mi:idx(m.date)})).filter(o => o.mi >= 0 && o.mi < S.days).map(o => ({...o, x:o.mi*W + W/2, full:o.m.name.length * 6.6 + 34}));
+  for (let a = 0; a < items.length; a++) for (let b2 = a + 1; b2 < items.length; b2++){
+    const A = items[a], B = items[b2];
+    if (Math.abs(A.x - B.x) < (A.full + B.full) / 2 + 6){ A.compact = true; B.compact = true; }
+  }
+  let lastRight = -1e9;
+  for (const o of items){ const w = o.compact ? 24 : o.full; o.alt = o.x - w/2 < lastRight + 3; if (!o.alt) lastRight = o.x + w/2; }
+  for (const {m, x, compact, alt} of items){
+    h += `<span class="vtag ${m.main ? "launch" : "ms"} ${compact ? "compact" : ""} ${alt ? "alt" : ""}" style="left:${x}px" title="${esc(m.name)} · ${nice(m.date)}"><span class="ms">${m.main ? "rocket_launch" : "flag"}</span>${compact ? "" : esc(m.name)}</span>`;
+  }
+  return h;
+}
+
+function barHTML(t, col, e, flags, rel, chg){
+  const W = dayW(), left = idx(e.start)*W + 2, width = (diff(e.start, e.end) + 1)*W - 4;
+  const cls = ["bar"]; let icon = "";
+  if (t.status === "done"){ cls.push("done"); icon = "check"; }
+  else if (flags.late.has(t.id)){ cls.push("late"); icon = "warning"; }
+  else if (flags.blocked.has(t.id)){ cls.push("blocked"); icon = "lock"; }
+  else if (flags.clash.has(t.id)){ icon = "person_off"; }
+  else if (flags.past.has(t.id)){ icon = "flag"; cls.push("pastms"); }
+  else if (flags.conflict.has(t.id)){ icon = "link_off"; }
+  if (t.status === "doing"){ cls.push("doing"); if (!icon) icon = "timelapse"; }
+  const segs = (flags.clash.get(t.id) || []).map(c => `<span class="clashseg" style="left:${diff(e.start, c.from)*W - 2}px;width:${(diff(c.from, c.to) + 1)*W}px"></span>`).join("");
+  const awayTip = (flags.clash.get(t.id) || []).map(c => `${c.person} away ${range(c.from, c.to)}`).join(", ");
+  if (chg) cls.push("moved");
+  if (rel.has(t.id)) cls.push("rel");
+  if ((S.openId || S.selId) === t.id && !chg) cls.push("sel");
+  const days = diff(e.start, e.end) + 1;
+  const own = ownersOf(t), avW = own.length ? 16 + (own.length - 1) * 10 : 0, avOut = own.length > 0;
+  if (avOut) cls.push("avout");
+  const av = own.length ? `<span class="baravs" ${avOut ? `style="left:${-avW - 5}px"` : ""}>${own.map(avatar).join("")}</span>` : "";
+  const tg = taskTags(t, S.cats.get(t.cat)); const tip = `${t.name}${tg.length ? " [" + tg.join(", ") + "]" : ""} · ${nice(e.start)} to ${nice(e.end)} (${plural(days, "day")})${t.status === "doing" ? " · In Progress" : ""}${ownersOf(t).length ? " · " + ownersOf(t).join(", ") : ""}${flags.late.has(t.id) ? " · Late" : flags.blocked.has(t.id) ? " · Blocked by a late task" : ""}${awayTip ? " · " + awayTip : ""}${flags.past.has(t.id) ? " · Finishes after " + flags.past.get(t.id).map(m => m.name).join(", ") : ""}${clProgress(t) ? ` · Checklist ${clProgress(t).done}/${clProgress(t).total}` : ""}`;
+  const prog = clProgress(t), pill = prog && width >= 70 ? clPill(prog) : "";
+  return `<div class="${cls.join(" ")}" data-bar="${t.id}" style="left:${left}px;width:${width}px;--fill:${col.fill};--ink2:${col.ink}" title="${esc(tip)}">
+    ${avOut ? av : ""}<span class="bclip">${segs}${avOut ? "" : av}${icon ? `<span class="ms bi">${icon}</span>` : ""}<span class="bn">${esc(titleCase(t.name))}</span>${pill}</span><span class="h h-l" data-h="l"></span><span class="h h-r" data-h="r"></span></div>`;
+}
+function changeWords(chg){
+  if (!chg.from.start) return "New dates";
+  const ds = diff(chg.from.start, chg.to.start), de = diff(chg.from.end, chg.to.end);
+  if (ds === de) return ds > 0 ? `${plural(ds, "day")} later` : `${plural(-ds, "day")} earlier`;
+  if (ds === 0) return de > 0 ? `Ends ${plural(de, "day")} later` : `Ends ${plural(-de, "day")} earlier`;
+  if (de === 0) return ds > 0 ? `Starts ${plural(ds, "day")} later` : `Starts ${plural(-ds, "day")} earlier`;
+  return de > 0 ? `Ends ${plural(de, "day")} later` : `Ends ${plural(-de, "day")} earlier`;
+}
+function deltaHTML(chg, W){
+  const later = !chg.from.end || chg.to.end >= chg.from.end;
+  const short = !chg.from.start ? "New" : (() => { const de = diff(chg.from.end, chg.to.end); return de === 0 ? (diff(chg.from.start, chg.to.start) > 0 ? "Starts later" : "Starts earlier") : `${de > 0 ? "+" : "−"}${plural(Math.abs(de), "day")}`; })();
+  return `<span class="delta ${later ? "" : "earlier"}" style="left:${(idx(chg.to.end) + 1)*W + 4}px">${short}</span>`;
+}
+function avatar(name){
+  const p = person(name), c = p ? personColor(name) : colorOf("slate");
+  return `<span class="avatar" style="background:${c.fill};color:${c.ink}" title="${esc(name)}">${esc(p ? p.ini : name.trim().slice(0,2).toUpperCase())}</span>`;
+}
+const avatarStack = list => list.length ? `<span class="avstack" title="${esc(list.join(", "))}">${list.map(avatar).join("")}</span>` : "";
+
+/* mini Team Away strip: only people who have time away get a lane */
+function awayMiniHTML(W, trackW){
+  const lanes = TEAM.map(p => ({p, list:[...S.away.values()].filter(a => a.person === p.name).map(a => ({a, e:effAway(a)})).filter(x => x.e.start && x.e.end)})).filter(l => l.list.length);
+  if (!lanes.length) return "";
+  const ti = idx(TODAY);
+  let names = "", bars = "";
+  lanes.forEach((l, i) => {
+    const pc = personColor(l.p.name);
+    names += `<span class="amname" style="--lf:${pc.fill};--li:${pc.ink}">${avatar(l.p.name)}${esc(l.p.name)}</span>`;
+    for (const {a, e} of l.list){
+      const days = diff(e.start, e.end) + 1;
+      bars += `<span class="ambar" style="left:${idx(e.start)*W+2}px;width:${Math.max(3, days*W-4)}px;top:${6 + i*13}px;--lf:${pc.fill};--li:${pc.ink}" title="${esc(`${l.p.name} away · ${nice(e.start)} to ${nice(e.end)} (${plural(days, "day")})${a.note ? " · " + a.note : ""}`)}"></span>`;
+    }
+  });
+  return `<div class="awaymini" id="awaymini"><div class="aminner"><div class="label"><button class="amlist" data-act="away-top" tabindex="-1" title="Back up to Team Away">${names}</button></div><div class="track" style="width:${trackW}px;height:${lanes.length*13 + 9}px">${ti >= 0 && ti < S.days ? `<span class="amtoday" style="left:${ti*W + W/2 - 1}px"></span>` : ""}${bars}</div></div></div>`;
+}
+/* show the mini strip only once the full Team Away rows have scrolled up behind the date header */
+function updateAwayMini(instant){
+  const m = $("awaymini"); if (!m) return;
+  const b = $("board"), rows = b.querySelectorAll(".row.awayrow"), last = rows[rows.length - 1], head = b.querySelector(".row.head");
+  const on = !!last && b.scrollTop > last.offsetTop + last.offsetHeight - (head ? head.offsetHeight : 0) - 2;
+  if (m.classList.contains("on") === on) return;
+  if (instant) m.classList.add("noanim");
+  m.classList.toggle("on", on);
+  if (instant){ void m.offsetHeight; m.classList.remove("noanim"); }
+}
+/* Team Away: pinned at the top, one row per person; drag across days on a row to add time away */
+function awayHTML(W, trackW, flags){
+  const collapsed = S.collapsed.has("__away"), ad = awayDiff();
+  const all = [...S.away.values()].filter(a => TEAM_NAMES.includes(a.person));
+  /* which tasks clash with each person's time away */
+  const byPerson = new Map(TEAM_NAMES.map(n => [n, []]));
+  for (const [tid, cs] of flags.clash) for (const c of cs) byPerson.get(c.person).push({t:S.tasks.get(tid), c});
+  const total = new Set([...flags.clash.keys()]).size;
+  let h = `<div class="row cat awayrow ${collapsed ? "collapsed" : ""}" data-cat="__away">
+    <div class="label">
+      <button class="icon-btn tog" data-act="toggle" aria-label="${collapsed ? "Expand" : "Collapse"} Team Away" aria-expanded="${!collapsed}"><span class="ms">expand_more</span></button>
+      <button class="cat-name" data-act="toggle">Team Away</button>
+      ${collapsed && total ? `<button class="clashpill" data-act="toggle" title="Expand to see who"><span class="ms">person_off</span>${plural(total, "Clash", "Clashes")}</button>` : ""}
+      <span class="count" title="${plural(all.length, "time away entry")}">${all.length}</span>
+    </div>
+    <div class="track" style="width:${trackW}px"></div></div>`;
+  if (collapsed) return h;
+  TEAM.forEach((p, i) => {
+    const mine = all.filter(a => a.person === p.name).sort((a, b) => (effAway(a).start || "").localeCompare(effAway(b).start || ""));
+    h += `<div class="row task awayrow ${i === TEAM.length - 1 ? "last" : ""}" data-person="${p.name}">
+      <div class="label"><button class="pbtn" data-act="open-person" data-p="${p.name}" title="See ${esc(p.name)}'s time away">${avatar(p.name)}<span class="pname">${esc(p.name)}</span></button>${(() => {
+        const hits = byPerson.get(p.name).sort((x, y) => x.c.from.localeCompare(y.c.from));
+        if (!hits.length) return "";
+        const tip = `Clashes with: ${hits.map(x => `${titleCase(x.t.name)} (${plural(x.c.days, "day")})`).join(", ")}. Click to scroll to them`;
+        return `<button class="clashpill" data-act="show-clashes" data-p="${p.name}" title="${esc(tip)}"><span class="ms">person_off</span>${plural(hits.length, "Clash", "Clashes")}</button>`;
+      })()}</div>
+      <div class="track awayplace" style="width:${trackW}px" data-awayplace="${p.name}" title="Drag across days to add time away for ${esc(p.name)}">`;
+    for (const a of mine){
+      const e = effAway(a); if (!e.start || !e.end) continue;
+      const chg = ad && ad.get(a.id);
+      if (chg && chg.from.start) h += `<div class="ghost" style="left:${idx(chg.from.start)*W+2}px;width:${(diff(chg.from.start, chg.from.end)+1)*W-4}px">${W > 20 ? "Now" : ""}</div>`;
+      const days = diff(e.start, e.end) + 1;
+      const tip = `${p.name} away · ${nice(e.start)} to ${nice(e.end)} (${plural(days, "day")})${a.note ? " · " + a.note : ""}`;
+      const pc = personColor(a.person);
+      h += `<div class="bar leave ${chg ? "moved" : ""} ${(S.openAway || S.selAway) === a.id ? "sel" : ""}" data-bar="${a.id}" data-kind="away" style="left:${idx(e.start)*W+2}px;width:${days*W-4}px;--lf:${pc.fill};--ink2:${pc.ink}" title="${esc(tip)}">
+        <span class="h h-l" data-h="l"></span><span class="ms bi">beach_access</span><span class="bn">${esc(a.note || "Away")}</span><span class="h h-r" data-h="r"></span></div>`;
+      if (chg) h += deltaHTML(chg, W);
+    }
+    h += `</div></div>`;
+  });
+  return h;
+}
+/* in categories set to "colour bars by tag", a bar takes the colour of its first tag */
+function barColor(t){ const o = ownersOf(t); return o.length === 1 ? personColor(o[0]) : SHARED; }
+/* tags were retired in favour of sub-categories; old tag data is left on tasks but no longer shown or used */
+const taskTags = (t, c) => [];
+function tagPills(t, c){ return taskTags(t, c).map(x => `<span class="tag neutral">${esc(x)}</span>`).join(""); }
+function renderStats(flags){
+  const L = mainMilestone(), toGo = L ? diff(TODAY, L.date) : null;
+  let h = `<button class="chip launch" data-act="milestones" title="Launch and milestones. Click to edit"><span class="ms">rocket_launch</span>${L ? `${esc(L.name)} <b>${short(L.date)}</b>` : "Set Launch Date"}<span class="ms calic2">edit_calendar</span></button>`;
+  if (toGo !== null) h += `<span class="chip soft"><span class="ms">timer</span>${toGo >= 0 ? `${toGo} Day${toGo === 1 ? "" : "s"} Till Launch` : `${-toGo} Days Since Launch`}</span>`;
+  if (flags.late.size) h += `<button class="chip bad" data-act="jump-flag" data-k="late" title="Click to step through the late tasks"><span class="ms">warning</span>${flags.late.size} Late</button>`;
+  if (flags.blocked.size) h += `<button class="chip bad" data-act="jump-flag" data-k="blocked" title="Click to step through the tasks blocked by a late task"><span class="ms">lock</span>${flags.blocked.size} Blocked</button>`;
+  setHTML($("stats"), h);
+}
+function renderOwners(){}
+function scrollToDate(s, smooth){ const b = $("board"); b.scrollTo({left:Math.max(0, idx(s)*dayW() - 160), behavior:smooth ? "smooth" : "auto"}); }
+function scrollToTask(id){
+  const t = S.tasks.get(id); if (!t) return;
+  const e = eff(t), b = $("board");
+  const left = e.start ? Math.max(0, idx(e.start)*dayW() - 48) : Math.max(0, idx(TODAY)*dayW() - 160);
+  const row = b.querySelector(`[data-task="${id}"]`);
+  const top = row ? Math.max(0, row.offsetTop - b.clientHeight/2 + 20) : b.scrollTop;
+  b.scrollTo({left, top, behavior:"smooth"});
+}
+
+/* ---------- drawer ---------- */
+function openDrawer(id, focusName){ if (S.notesOpen){ S.notesOpen = false; $("notes").classList.remove("open"); } S.openAway = null; S.openPerson = null; S.openId = id; render(); $("drawer").classList.add("open"); if (focusName){ const el = $("fName"); if (el){ el.focus(); el.select(); } } }
+function closeDrawer(){ const a = document.activeElement; if (a && a.blur) a.blur(); S.openId = null; S.selId = null; S.selAway = null; S.selPerson = null; S.openAway = null; S.openPerson = null; $("drawer").classList.remove("open"); render(); }
+function openAway(id){ const a = S.away.get(id); if (!a) return; openPerson(a.person, id); }
+
+function renderDrawer(flags){
+  const dr = $("drawer");
+  if (S.openPerson) return renderPersonDrawer(flags);
+  const t = S.openId && S.tasks.get(S.openId);
+  if (!t){ dr.classList.remove("open"); dr.dataset.tid = ""; return; }
+  const active = document.activeElement;
+  /* don't rebuild while someone is typing in this task's name, notes or checklist (an empty "add" box is fine, so new items show straight away) */
+  const typing = active && (active.id === "fName" || active.id === "fNotes" || (active.classList && active.classList.contains("cltext") && active.id !== "clNew") || (active.id === "clNew" && active.value));
+  if (dr.dataset.tid === t.id && typing) return;
+  const keepNew = dr.dataset.tid === t.id && active && active.id === "clNew";
+  const keepBox = dr.dataset.tid === t.id && active && active.classList && active.classList.contains("clbox") ? active.dataset.ci : null;
+  flags = flags || computeFlags();
+  const c = S.cats.get(t.cat) || {name:"No category", color:"slate"}, col = colorOf(c.color), e = eff(t);
+  const deps = (t.deps || []).map(d => S.tasks.get(d)).filter(Boolean);
+  const blocks = dependentsOf(t.id);
+  const opts = catsSorted().map(cc => {
+    const items = tasksOf(cc.id).filter(x => x.id !== t.id && !(t.deps || []).includes(x.id) && !wouldCycle(t.id, x.id));
+    return items.length ? `<optgroup label="${esc(titleCase(cc.name))}">${items.map(x => `<option value="${x.id}">${esc(titleCase(x.name))}</option>`).join("")}</optgroup>` : "";
+  }).join("");
+  const days = e.start && e.end ? diff(e.start, e.end) + 1 : 0;
+  const conflict = flags.conflict.get(t.id);
+  const testing = !!S.test;
+  let warn = "";
+  if (testing) warn = `<div class="warnbox blue"><span class="ms">science</span><span>Test Mode: date changes here only show what would happen. Other details can't be edited until you exit.</span></div>`;
+  else if (flags.late.has(t.id)) warn = `<div class="warnbox red"><span class="ms">warning</span><span>This was due ${nice(e.end)} and isn't marked done. Mark it done, or give it a new end date.</span></div>`;
+  else if (flags.blocked.has(t.id)) warn = `<div class="warnbox red"><span class="ms">lock</span><span>Something this task waits on is late, so it may slip too.</span></div>`;
+  else if (conflict) warn = `<div class="warnbox"><span class="ms">link_off</span><span>Starts before “${esc(titleCase(conflict.name))}” finishes (${short(eff(conflict).end)}).</span></div>`;
+  const clashes = flags.clash.get(t.id) || [];
+  let clashBox = "";
+  if (clashes.length){
+    const after = clearOfLeave(t, 1), before = clearOfLeave(t, -1);
+    /* only offer an earlier slot if it's not in the past and everything this task waits on is finished by then */
+    const beforeOk = before && before.start >= TODAY && (t.deps || []).every(d => { const dt = S.tasks.get(d); if (!dt || dt.status === "done") return true; const de = eff(dt); return !de.end || de.end < before.start; });
+    clashBox = `<div class="warnbox"><span class="ms">person_off</span><div class="clashlist">
+      <span>${clashes.map(c => `${esc(c.person)} is away ${range(c.leave.start, c.leave.end)}${c.leave.note ? ` (${esc(c.leave.note)})` : ""}. ${c.days === 1 ? "1 day of this task falls" : `${c.days} days of this task fall`} in that time.`).join("<br>")}</span>
+      <div class="movebtns">${beforeOk ? `<button class="btn" data-act="clear-leave" data-dir="-1"><span class="ms">arrow_back</span>Move Before (${range(before.start, before.end)})</button>` : ""}${after ? `<button class="btn" data-act="clear-leave" data-dir="1">Move After (${range(after.start, after.end)})<span class="ms">arrow_forward</span></button>` : ""}</div>
+    </div></div>`;
+  }
+  const owners = ownersOf(t);
+  dr.dataset.tid = t.id;
+  const dhtml = `
+    <div class="dhead">
+      <span class="catchip" style="background:var(--hover);color:var(--ink-soft)">${esc(titleCase(c.name))}</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" data-act="close" aria-label="Close"><span class="ms">close</span></button>
+    </div>
+    <div class="dbody">
+      <input id="fName" class="tinput" value="${esc(titleCase(t.name))}" aria-label="Task name" placeholder="Task name" ${testing ? "readonly" : ""}>
+      ${warn}${clashBox}${(flags.past.get(t.id) || []).map(m => `<div class="warnbox red"><span class="ms">flag</span><span>Finishes ${plural(diff(m.date, e.end), "day")} after ${esc(m.name)} (${nice(m.date)}). It needs to end on or before that day.</span></div>`).join("")}
+      <div class="field real-only"><span class="flabel">Status</span>
+        <div class="statusseg">${Object.entries(STATUS).map(([k,v]) => `<button data-act="set-status" data-s="${k}" class="${(t.status || "todo") === k ? "on" : ""} ${k}"><span class="ms" style="font-size:18px">${v.icon}</span>${v.label}</button>`).join("")}</div>
+      </div>
+      <div class="field">
+        <div class="two">
+          <div class="field"><label for="fStart">Starts</label><input type="date" id="fStart" class="in" value="${e.start || ""}"></div>
+          <div class="field"><label for="fEnd">Ends</label><input type="date" id="fEnd" class="in" value="${e.end || ""}"></div>
+        </div>
+        <p class="hint">${days ? `${plural(days, "day")}, ${nice(e.start)} to ${nice(e.end)}. <button class="link real-only" data-act="clear-dates">Remove Dates</button>` : `No dates yet. Pick them here, or drag across days on this task's row in the chart.`}</p>
+      </div>
+      ${e.start && e.end && t.status !== "done" ? `
+      <div class="field test-only" style="flex-direction:column"><span class="flabel">Finish Late By</span>
+        <div class="delaybtns"><button data-act="delay" data-n="1">+1 Day</button><button data-act="delay" data-n="3">+3 Days</button><button data-act="delay" data-n="7">+1 Week</button><button data-act="delay" data-n="14">+2 Weeks</button></div>
+        <p class="hint">Each click adds to the delay. Everything that waits on this task moves with it.</p></div>` : ""}
+      <div class="field real-only"><span class="flabel">Assigned To</span>
+        <div class="chips">${TEAM.map(p => { const on = owners.includes(p.name), pc = personColor(p.name); return `<button class="tagopt person ${on ? "on" : ""}" data-act="toggle-owner" data-p="${p.name}" aria-pressed="${on}" ${on ? `style="background:${pc.fill};color:${pc.ink}"` : ""}><span class="ms">${on ? "check" : "add"}</span>${p.name}</button>`; }).join("")}</div>
+      </div>
+      ${subsOf(c).length ? `<div class="field real-only"><label class="flabel" for="fSub">Sub-Category</label><select id="fSub" class="in"><option value="">None</option>${subsOf(c).map(x => `<option value="${esc(x.id)}" ${t.sub === x.id ? "selected" : ""}>${esc(titleCase(x.name))}</option>`).join("")}</select></div>` : ""}
+      <div class="field"><span class="flabel">Starts After</span>
+        <div class="chips">${deps.map(d => depChip(d, !testing)).join("") || `<span class="hint">Nothing. It can start any time.</span>`}</div>
+        ${opts && !testing ? `<select id="fDep" class="in" aria-label="Add a task this one waits for"><option value="">+ Add A Task It Waits For…</option>${opts}</select>` : ""}
+      </div>
+      ${blocks.length ? `<div class="field"><span class="flabel">Holds Up</span><div class="chips">${blocks.map(d => depChip(d, false)).join("")}</div></div>` : ""}
+      ${checklistHTML(t)}
+      <div class="field real-only"><label for="fNotes">Notes</label><textarea id="fNotes" class="in" placeholder="Links, decisions, anything useful">${esc(t.notes || "")}</textarea></div>
+    </div>
+    <div class="dfoot real-only"><button class="btn danger" data-act="drawer-del"><span class="ms">delete</span>Delete Task</button><span class="hint"><kbd>${IS_MAC ? "⌘" : "Ctrl"}</kbd> <kbd>Z</kbd> to undo</span></div>`;
+  dr.classList.add("open");
+  if (setHTML(dr, dhtml)){
+    bindDrawer(t);
+    if (keepNew && $("clNew")) $("clNew").focus();
+    else if (keepBox){ const b = dr.querySelector(`.clbox[data-ci="${keepBox}"]`); if (b) b.focus(); }
+  }
+}
+function checklistHTML(t){
+  const cl = clOf(t), items = cl ? cl.items : [], p = clProgress(t);
+  return `<div class="field real-only cl">
+    <div class="clhead"><span class="ms lead">checklist</span><span class="cltitle">Todo's</span>${p ? `<span class="clcount ${p.full ? "full" : ""}">${p.done}/${p.total}</span>` : ""}</div>
+    <div class="clprog ${p && p.full ? "full" : ""}"><i style="width:${p ? Math.round(p.done / p.total * 100) : 0}%"></i></div>
+    <div class="clitems">${items.map(it => `<div class="clitem ${it.done ? "done" : ""}">${items.length > 1 ? `<span class="cldrag" data-ci="${it.id}" title="Drag to reorder"><span class="ms">drag_indicator</span></span>` : `<span class="cldrag" style="visibility:hidden"></span>`}<button class="clbox" data-act="cl-toggle" data-ci="${it.id}" role="checkbox" aria-checked="${!!it.done}" aria-label="${it.done ? "Done" : "Not done"}: ${esc(it.text)}"><span class="ms">${it.done ? "check_circle" : "radio_button_unchecked"}</span></button><input class="cltext" data-ci="${it.id}" value="${esc(it.text)}" aria-label="Todo"><button class="icon-btn" data-act="cl-del" data-ci="${it.id}" title="Remove" aria-label="Remove ${esc(it.text)}"><span class="ms">close</span></button></div>`).join("")}
+      <div class="cladd"><label class="clbox" for="clNew" aria-hidden="true"><span class="ms">radio_button_unchecked</span></label><input id="clNew" class="cltext" placeholder="${items.length ? "Add another todo" : "Add a todo"}" aria-label="Add a todo"><button class="btn" data-act="cl-new" type="button">Add</button></div>
+    </div>
+  </div>`;
+}
+/* change the open task's checklist through the undo history. fn edits a copy; return false to skip */
+function editChecklist(id, label, fn){
+  if (!S.tasks.get(id)) return;
+  const c = clOf(S.tasks.get(id)) || {items:[]};
+  const next = {items:c.items.map(x => ({...x}))};
+  if (fn(next) === false) return;
+  act(label, () => patchTask(id, {checklist:next}));
+}
+function depChip(d, removable){
+  const c = S.cats.get(d.cat) || {color:"slate"};
+  return `<span class="dep ${removable ? "" : "ro"}"><i class="cd" style="background:${barColor(d).fill}"></i><span class="t">${esc(titleCase(d.name))}</span>${removable ? `<button data-act="rm-dep" data-d="${d.id}" aria-label="Remove ${esc(titleCase(d.name))}"><span class="ms">close</span></button>` : ""}</span>`;
+}
+/* a person's panel: their time away (click one to open it up and edit it in place) and every task that clashes with it */
+function renderPersonDrawer(flags){
+  const dr = $("drawer"), name = S.openPerson;
+  const active = document.activeElement;
+  if (dr.dataset.tid === "person:" + name && active && active.id === "aNote") return;
+  flags = flags || computeFlags();
+  if (S.openAway && !S.away.has(S.openAway)) S.openAway = null;
+  const testing = !!S.test;
+  const mine = [...S.away.values()].filter(a => a.person === name).map(a => ({a, e:effAway(a)})).filter(x => x.e.start && x.e.end).sort((x, y) => x.e.start.localeCompare(y.e.start));
+  const hits = personClashes(name, flags);
+  const item = ({a, e}) => {
+    const open = S.openAway === a.id, days = diff(e.start, e.end) + 1;
+    const n = [...flags.clash.values()].filter(cs => cs.some(c => c.leave.id === a.id)).length;
+    return `<div class="awaywrap ${open ? "open" : ""}">
+      <button class="awayitem" data-act="toggle-away-item" data-id="${a.id}" aria-expanded="${open}"><span class="ms">beach_access</span>
+        <span class="ai"><b>${range(e.start, e.end)}${a.note ? ` · ${esc(a.note)}` : ""}</b><span>${plural(days, "day")}, back ${nice(addDays(e.end, 1))}</span></span>
+        ${n ? `<span class="clashpill"><span class="ms">person_off</span>${plural(n, "Clash", "Clashes")}</span>` : ""}<span class="ms chev">expand_more</span></button>
+      ${open ? `<div class="awayedit">
+        <div class="two">
+          <div class="field"><label for="aStart">From</label><input type="date" id="aStart" class="in" value="${e.start}"></div>
+          <div class="field"><label for="aEnd">Until</label><input type="date" id="aEnd" class="in" value="${e.end}"></div>
+        </div>
+        <div class="field real-only"><label for="aNote">Note</label><textarea id="aNote" class="in" style="height:60px" placeholder="e.g. Trip, Christmas break">${esc(a.note || "")}</textarea></div>
+        <div class="real-only" style="display:flex;justify-content:flex-end"><button class="btn danger" data-act="del-away" data-id="${a.id}"><span class="ms">delete</span>Delete</button></div>
+      </div>` : ""}
+    </div>`;
+  };
+  dr.dataset.tid = "person:" + name;
+  const html = `
+    <div class="dhead">
+      <span class="catchip" style="background:var(--hover);color:var(--ink-soft)">Team Away</span>
+      <div class="spacer"></div>
+      <button class="icon-btn" data-act="close" aria-label="Close"><span class="ms">close</span></button>
+    </div>
+    <div class="dbody">
+      <div class="tinput" style="display:flex;align-items:center;gap:10px">${avatar(name)}${esc(name)}</div>
+      ${testing ? `<div class="warnbox blue"><span class="ms">science</span><span>Test Mode: date changes here only show what would happen.</span></div>` : ""}
+      <div class="field real-only"><span class="flabel">Colour</span>
+        <div class="swatches pswatch">${PERSON_PALETTE().map(pc => { const mineK = personColorKey(name), who = TEAM.find(x => x.name !== name && personColorKey(x.name) === pc.k);
+          return `<button data-act="set-pcolor" data-p="${name}" data-k="${pc.k}" class="${pc.k === mineK ? "on" : ""}" style="background:${pc.fill};color:${pc.ink}" ${who ? `disabled title="${esc(who.name)}'s colour"` : `title="${titleCase(pc.k)}"`} aria-label="${who ? `${titleCase(pc.k)}, taken by ${esc(who.name)}` : titleCase(pc.k)}">${who ? esc(who.ini) : ""}</button>`; }).join("")}</div>
+      </div>
+      <div class="field"><span class="flabel">Time Away</span>
+        <div class="awaylist">${mine.length ? mine.map(item).join("") : `<span class="hint">None yet.</span>`}</div>
+        <p class="hint real-only addhint"><span class="ms">info</span>Drag in your row to add time away</p>
+      </div>
+      <div class="field"><span class="flabel">Clashes</span>
+        <div class="chips">${hits.length ? hits.map(({t, c}) => `<span class="dep click" data-act="goto-task" data-id="${t.id}" role="button" tabindex="0"><i class="cd" style="background:${barColor(t).fill}"></i><span class="t">${esc(titleCase(t.name))}</span><span class="dd">${range(c.from, c.to)}</span></span>`).join("") : `<span class="hint">No clashes.</span>`}</div>
+        ${hits.length ? `<div><button class="btn" data-act="show-clashes" data-p="${name}"><span class="ms">center_focus_strong</span>Show Clashes On The Chart</button></div>` : ""}
+      </div>
+    </div>`;
+  dr.classList.add("open");
+  if (!setHTML(dr, html)) return;
+  const id = S.openAway; if (!id || !$("aStart")) return;
+  const dates = () => { let st = $("aStart").value, en = $("aEnd").value; if (!st && !en) return; if (st && !en) en = st; if (!st && en) st = en; if (en < st) en = st; proposeAway(id, st, en); };
+  $("aStart").onchange = dates; $("aEnd").onchange = dates;
+  const note = $("aNote");
+  if (note){
+    const commit = () => { const v = note.value.trim(); if (S.away.has(id) && (S.away.get(id).note || "") !== v) act("Edit time away note", () => patchAway(id, {note:v})); };
+    note.oninput = () => { clearTimeout(timers.a); timers.a = setTimeout(commit, 1200); };
+    note.onblur = () => { clearTimeout(timers.a); commit(); render(); };
+  }
+}
+function proposeAway(id, s, e){
+  const a = S.away.get(id); if (!a) return;
+  if (S.test){
+    S.test.hist.push(testSnap());
+    const r = realAway(a); if (r.start === s && r.end === e) S.test.away.delete(id); else S.test.away.set(id, {start:s, end:e});
+    render(); return;
+  }
+  act(`Move ${a.person}'s time away`, () => patchAway(id, {start:s, end:e}));
+}
+function addAway(name, s, e){
+  if (!S.canWrite) return;
+  if (S.test){ toast("Exit Test Mode to add time away."); return; }
+  const id = newId("a");
+  act(`Add time away for ${name}`, () => put("away", id, {person:name, start:s, end:e, note:""}));
+  selectAway(id);
+}
+const testSnap = () => ({t:new Map(S.test.changes), a:new Map(S.test.away)});
+
+const timers = {};
+function bindDrawer(t){
+  const id = t.id;
+  const commitName = (final) => { const el = $("fName"); if (!el || S.test) return; let v = el.value.trim() || "Untitled Task"; if (final) v = titleCase(v); if (final) el.value = v; if (S.tasks.get(id) && S.tasks.get(id).name !== v) act("Rename task", () => patchTask(id, {name:v})); };
+  const commitNotes = () => { const el = $("fNotes"); if (!el) return; if (S.tasks.get(id) && (S.tasks.get(id).notes || "") !== el.value) act("Edit notes", () => patchTask(id, {notes:el.value})); };
+  $("fName").oninput = () => { clearTimeout(timers.n); timers.n = setTimeout(() => commitName(false), 1200); };
+  $("fName").onkeydown = ev => { if (ev.key === "Enter") ev.target.blur(); };
+  $("fName").onblur = () => { clearTimeout(timers.n); commitName(true); render(); };
+  $("fNotes").oninput = () => { clearTimeout(timers.o); timers.o = setTimeout(commitNotes, 1200); };
+  $("fNotes").onblur = () => { clearTimeout(timers.o); commitNotes(); render(); };
+  const dateChange = () => {
+    let s = $("fStart").value, e = $("fEnd").value;
+    if (!s && !e) return proposeChange(id, null, null);
+    if (s && !e) e = addDays(s, 4);
+    if (!s && e) s = addDays(e, -4);
+    if (e < s) e = s;
+    proposeChange(id, s, e);
+  };
+  $("fStart").onchange = dateChange; $("fEnd").onchange = dateChange;
+  const nw = $("clNew");
+  if (nw){
+    const addItem = () => { const v = nw.value.trim(); if (!v) return; nw.value = ""; editChecklist(id, "Add a todo", c => { c.items.push({id:newId("i"), text:v, done:false}); }); };
+    nw._add = addItem;
+    nw.onkeydown = ev => { if (ev.key === "Enter"){ ev.preventDefault(); addItem(); } };
+    nw.onblur = ev => { if (!(ev.relatedTarget && ev.relatedTarget.dataset && ev.relatedTarget.dataset.act === "cl-new")) addItem(); };
+    $("drawer").querySelectorAll(".clitem .cltext").forEach(inp => {
+      const ci = inp.dataset.ci;
+      const commit = () => { const v = inp.value.trim(); editChecklist(id, v ? "Edit a todo" : "Remove a todo", c => { const i = c.items.findIndex(x => x.id === ci); if (i < 0) return false; if (!v){ c.items.splice(i, 1); return; } if (c.items[i].text === v) return false; c.items[i].text = v; }); };
+      inp.onkeydown = ev => { if (ev.key === "Enter"){ ev.preventDefault(); inp.blur(); } };
+      inp.onblur = () => { commit(); setTimeout(render, 0); };
+    });
+  }
+  const fsub = $("fSub"); if (fsub) fsub.onchange = ev => { const v = ev.target.value || null; if (v) S.collapsed.delete(S.tasks.get(id).cat + "/" + v); act("Change sub-category", () => patchTask(id, {sub:v})); };
+  const dep = $("fDep"); if (dep) dep.onchange = ev => { const v = ev.target.value; if (!v) return; act("Add a dependency", () => patchTask(id, {deps:[...(S.tasks.get(id).deps || []), v]})); };
+}
+
+/* ---------- date changes: approve real ones, sandbox test ones ---------- */
+function proposeChange(id, s, e){
+  const t = S.tasks.get(id); if (!t) return;
+  if (S.test){
+    if (!s || !e) return;
+    S.test.hist.push(testSnap());
+    const ch = cascade(id, s, e, x => eff(x));
+    for (const [k, v] of ch){ const r = real(S.tasks.get(k)); if (r.start === v.start && r.end === v.end) S.test.changes.delete(k); else S.test.changes.set(k, v); }
+    render(); return;
+  }
+  if (!s || !e){ act("Remove dates", () => patchTask(id, {start:null, end:null})); return; }
+  const ch = cascade(id, s, e, x => real(x));
+  if (ch.size > 1){ S.preview = {origin:id, changes:ch}; render(); scrollToTask(id); }
+  else {
+    const before = real(t).end;
+    act(`Move “${t.name}”`, () => patchTask(id, {start:s, end:e}));
+    const crossed = milestones().filter(m => inScope(t, m) && e > m.date && !(before && before > m.date));
+    if (crossed.length) toast(`“${titleCase(t.name)}” now finishes after ${crossed.map(m => m.name).join(" and ")} (${short(crossed[0].date)}).`, true);
+  }
+}
+function commitChanges(label, changes){ act(label, () => { for (const [k, v] of changes) patchTask(k, {start:v.start, end:v.end}); }); }
+function startTest(focusId){
+  S.preview = null; S.test = {changes:new Map(), away:new Map(), hist:[]};
+  render(); if (focusId) scrollToTask(focusId);
+}
+function endTest(){ S.test = null; render(); }
+function testUndo(){ if (!S.test.hist.length){ toast("Nothing to undo in test mode"); return; } const h = S.test.hist.pop(); S.test.changes = h.t; S.test.away = h.a; render(); }
+
+function changeRows(changes, originId, awayCh){
+  const awayRows = [...((awayCh && awayCh.entries()) || [])].map(([id, c]) => { const a = S.away.get(id); return `<tr><td class="nm"><i class="cd" style="background:${personColor(a.person).fill}"></i>${esc(a.person)} Away${a.note ? ` (${esc(a.note)})` : ""}</td><td class="was">${range(c.from.start, c.from.end)}</td><td>${range(c.to.start, c.to.end)}</td><td class="ch">${changeWords(c)}</td></tr>`; }).join("");
+  const rows = [...changes.entries()].sort((a,b) => a[0] === originId ? -1 : b[0] === originId ? 1 : (a[1].to.start || "").localeCompare(b[1].to.start || ""));
+  return `<div class="ctable"><table><thead><tr><th>Task</th><th>Now</th><th>Would Be</th><th>Change</th></tr></thead><tbody>${rows.map(([id, c]) => {
+    const t = S.tasks.get(id), cat = S.cats.get(t.cat) || {color:"slate"};
+    return `<tr><td class="nm"><i class="cd" style="background:${barColor(t).fill}"></i>${esc(titleCase(t.name))}${id === originId ? `<span class="you">(the one you moved)</span>` : ""}</td><td class="was">${range(c.from.start, c.from.end)}</td><td>${range(c.to.start, c.to.end)}</td><td class="ch">${changeWords(c)}</td></tr>`;
+  }).join("")}${awayRows}</tbody></table></div>`;
+}
+function launchNote(changes){
+  const ms = milestones(); if (!ms.length) return "";
+  const lines = [];
+  for (const m of ms.slice().sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0))){
+    const n = [...changes.entries()].filter(([id, c]) => { const t = S.tasks.get(id); return t && inScope(t, m) && c.to.end > m.date && !(c.from.end && c.from.end > m.date); });
+    if (n.length) lines.push(`${n.length === 1 ? `“${esc(titleCase(S.tasks.get(n[0][0]).name))}”` : plural(n.length, "task")} would now finish after ${esc(m.name)} (${short(m.date)})`);
+  }
+  if (lines.length) return `<div class="warnbox red"><span class="ms">flag</span><span>${lines.join(".<br>")}.</span></div>`;
+  return `<div class="warnbox blue"><span class="ms">check_circle</span><span>No milestones affected.</span></div>`;
+}
+/* one small panel to edit the launch and the other milestones */
+function openMilestones(){
+  let rows = milestones().map(m => ({...m}));
+  if (!rows.some(r => r.main)) rows.unshift({id:"launch", name:"Launch", date:TODAY, main:true, cat:null, tag:null});
+  const scopes = [{v:"", l:"Everything"}];
+  for (const c of catsSorted()){ scopes.push({v:c.id + "|", l:titleCase(c.name)}); }
+  scopes.push({v:"|marker", l:"Marker Only (No Warnings)"});
+  const m = $("modal");
+  const read = () => { m.querySelectorAll(".msrow").forEach((r, i) => { const x = rows[i]; x.name = r.querySelector(".mname").value.trim(); x.date = r.querySelector(".mdate").value; const v = r.querySelector(".mscope").value; const [c, tg] = v ? v.split("|") : [null, null]; x.cat = c || null; x.marker = tg === "marker"; x.tag = null; }); };
+  const draw = () => {
+    m.innerHTML = `<div class="scrim" data-act="modal-bg"><form class="modal msmodal" id="msForm">
+      <h2>Launch And Milestones</h2>
+      <p class="hint">Each one is a line on the chart. Tasks it applies to are flagged if they finish after it; finishing on the day is fine.</p>
+      <div class="mslist">${rows.map((r, i) => `<div class="msrow">
+        <span class="ms" style="color:${r.main ? "var(--launch)" : "var(--accent)"}">${r.main ? "rocket_launch" : "flag"}</span>
+        <input class="in mname" value="${esc(r.name)}" placeholder="Name" aria-label="Milestone name" required>
+        <input class="in mdate" type="date" value="${esc(r.date || "")}" aria-label="Date" required>
+        <select class="in mscope" aria-label="Applies to">${scopes.map(o => `<option value="${esc(o.v)}" ${o.v === (isMarker(r) ? "|marker" : r.cat ? r.cat + "|" : "") ? "selected" : ""}>${esc(o.l)}</option>`).join("")}</select>
+        ${r.main ? `<span class="msmain" title="The main launch can't be removed">Launch</span>` : `<button type="button" class="icon-btn" data-rm="${i}" aria-label="Remove ${esc(r.name)}"><span class="ms">delete</span></button>`}
+      </div>`).join("")}</div>
+      <div><button type="button" class="btn" id="msAdd"><span class="ms">add</span>Add Milestone</button></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="modal-close">Cancel</button><button class="btn primary" type="submit">Save</button></div>
+    </form></div>`;
+    $("msAdd").onclick = () => { read(); rows.push({id:newId("m"), name:"", date:"", main:false, cat:null, tag:null}); draw(); const ins = m.querySelectorAll(".mname"); ins[ins.length - 1].focus(); };
+    m.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { read(); rows.splice(+b.dataset.rm, 1); draw(); });
+    $("msForm").onsubmit = ev => {
+      ev.preventDefault(); read();
+      const clean = rows.filter(r => r.name && r.date).map(r => ({id:r.id, name:titleCase(r.name), date:r.date, main:!!r.main, cat:isMarker(r) ? null : r.cat || null, tag:null, marker:isMarker(r)}));
+      const main = clean.find(r => r.main);
+      act("Edit milestones", () => put("settings", "plan", {...S.settings, milestones:clean, launch:main ? main.date : S.settings.launch}));
+      m.innerHTML = "";
+    };
+  };
+  draw();
+}
+function renderSheet(){
+  const el = $("sheet"), changes = diffMap();
+  if (S.preview && changes){
+    const o = S.tasks.get(S.preview.origin), others = changes.size - (changes.has(S.preview.origin) ? 1 : 0);
+    setHTML(el, `<div class="sheet" role="dialog" aria-label="Approve schedule change">
+      <h2><span class="ms">move_down</span>${esc(titleCase(`Moving “${o.name}” also pushes back ${plural(others, "other task")}`))}</h2>
+      <p class="hint">They wait on it, so they can't start until it's finished. On the chart, striped bars show where they'd go and dashed boxes show where they are now. Everything else is faded.</p>
+      ${changeRows(changes, S.preview.origin)}
+      ${launchNote(changes)}
+      <div class="btns">
+        <button class="btn" data-act="pv-cancel">Cancel</button>
+        <button class="btn" data-act="pv-one" title="The others stay where they are and get flagged as starting too early">Move Only “${esc(titleCase(o.name))}”</button>
+        <button class="btn primary" data-act="pv-all"><span class="ms">check</span>Move All ${changes.size} Tasks</button>
+      </div></div>`);
+    return;
+  }
+  if (S.test){
+    const ac = awayDiff(), n = (changes ? changes.size : 0) + ac.size;
+    const cNow = countClashes(true), cNew = countClashes(false);
+    const clashNote = cNow !== cNew ? `<div class="warnbox ${cNew > cNow ? "" : "blue"}"><span class="ms">person_off</span><span>Leave clashes would go from ${cNow} to ${cNew}.</span></div>` : "";
+    setHTML(el, `<div class="sheet test" role="region" aria-label="Test mode results">
+      <h2><span class="ms">science</span>${n ? titleCase(`In this test, ${plural(n, ac.size ? "thing" : "task")} would move`) : "Test Mode: Try A Delay"}</h2>
+      ${n ? changeRows(changes, null, ac) + launchNote(changes) + clashNote : `<p class="hint">Drag any bar (time away too), or open a task and use “Finish Late By”. Anything that waits on it moves too, and you'll see exactly what changes here. Your real plan stays as it is.</p>`}
+      <div class="btns">
+        ${n ? `<button class="btn" data-act="test-reset"><span class="ms">restart_alt</span>Start Over</button>` : ""}
+        <button class="btn" data-act="test">Exit Without Saving</button>
+        <button class="btn primary" data-act="test-apply" ${n ? "" : "disabled"}><span class="ms">check</span>Apply To The Real Plan</button>
+      </div></div>`);
+    return;
+  }
+  setHTML(el, "");
+}
+
+/* ---------- plan notes: summary + changelog ---------- */
+function fmtSummary(text){
+  const out = []; let list = null;
+  for (const raw of String(text || "").split("\n")){
+    const line = raw.trim();
+    if (/^[•\-*]\s+/.test(line)){ if (!list){ list = []; } list.push(`<li>${esc(line.replace(/^[•\-*]\s+/, ""))}</li>`); continue; }
+    if (list){ out.push(`<ul>${list.join("")}</ul>`); list = null; }
+    if (!line) continue;
+    if (line.endsWith(":") && line.length < 40) out.push(`<div class="sh">${esc(titleCase(line.slice(0, -1)))}</div>`);
+    else out.push(`<p>${esc(line)}</p>`);
+  }
+  if (list) out.push(`<ul>${list.join("")}</ul>`);
+  return out.join("") || `<p class="hint">No summary yet.</p>`;
+}
+function renderNotes(){
+  const el = $("notes");
+  if (!S.notesOpen){ el.classList.remove("open"); return; }
+  if (el.contains(document.activeElement) && ["sumEdit","logText"].includes(document.activeElement.id)) return;
+  const groups = new Map();
+  for (const e of [...S.log].sort((a,b) => (b.date || "").localeCompare(a.date || "") || (b.at || 0) - (a.at || 0))){ if (!groups.has(e.date)) groups.set(e.date, []); groups.get(e.date).push(e); }
+  const nh = `
+    <div class="dhead"><span class="catchip" style="background:var(--accent-soft);color:var(--accent)">Plan Notes</span><div class="spacer"></div>
+      <button class="icon-btn" data-act="notes" aria-label="Close"><span class="ms">close</span></button></div>
+    <div class="dbody">
+      <section>
+        <h3><span class="ms" style="color:var(--accent)">info</span>About This Plan
+          ${S.editingSummary ? "" : `<button class="link edit-only" data-act="edit-summary" style="margin-left:auto;font-size:14px">Edit</button>`}</h3>
+        ${S.editingSummary ? `<textarea id="sumEdit" class="in" style="height:320px">${esc(S.summary)}</textarea>
+          <p class="hint">Start a line with • for a bullet. A short line ending in : becomes a heading.</p>
+          <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" data-act="cancel-summary">Cancel</button><button class="btn primary" data-act="save-summary">Save</button></div>`
+        : `<div class="sumtext">${fmtSummary(S.summary)}</div>`}
+      </section>
+      <section>
+        <h3><span class="ms" style="color:var(--accent)">history</span>Changelog</h3>
+        <form class="logform edit-only" id="logForm"><input id="logText" class="in" placeholder="Log a change, e.g. Moved launch to 22 Dec" aria-label="New changelog entry"><button class="btn primary" type="submit"><span class="ms">add</span>Add</button></form>
+        ${groups.size ? [...groups].map(([d, items]) => `<div class="logday"><div class="logdate">${d ? nice(d) + " " + new Date(parse(d)).getUTCFullYear() : "No date"}</div><ul>${items.map(e => `<li><span>${esc(e.text)}</span><button class="icon-btn edit-only" data-act="del-log" data-id="${e.id}" aria-label="Delete entry" title="Delete entry"><span class="ms">delete</span></button></li>`).join("")}</ul></div>`).join("") : `<p class="hint">Nothing logged yet.</p>`}
+      </section>
+    </div>`;
+  el.classList.add("open");
+  if (!setHTML(el, nh)) return;
+  const f = $("logForm");
+  if (f) f.onsubmit = ev => {
+    ev.preventDefault(); const v = $("logText").value.trim(); if (!v || !S.db) return;
+    const id = newId("l"), entry = {date:TODAY, text:v, at:Date.now()};
+    S.log = [...S.log, {id, ...entry}]; $("logText").value = "";
+    enqueue("changelog/" + id, () => S.db.doc("changelog/" + id).set(entry)); renderNotes(); $("logText").focus();
+  };
+}
+function toggleNotes(){
+  S.notesOpen = !S.notesOpen; S.editingSummary = false;
+  if (S.notesOpen && S.openId){ S.openId = null; $("drawer").classList.remove("open"); render(); }
+  renderNotes();
+}
+
+/* ---------- category modal ---------- */
+function openSubModal(cid, sid){
+  const c = S.cats.get(cid); if (!c) return;
+  const s = sid ? subsOf(c).find(x => x.id === sid) : null, m = $("modal");
+  m.innerHTML = `<div class="scrim" data-act="modal-bg"><form class="modal" id="subForm">
+    <h2>${s ? "Rename Sub-Category" : "New Sub-Category"}</h2>
+    <div class="field"><label for="sName">Name</label><input id="sName" class="in" value="${esc(s ? s.name : "")}" placeholder="e.g. Episode 1" required>
+      <p class="hint">Sits inside ${esc(titleCase(c.name))}. Drag tasks into it, or use Add Task under it.</p></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="modal-close">Cancel</button><button class="btn primary" type="submit">${s ? "Save" : "Add Sub-Category"}</button></div>
+  </form></div>`;
+  $("subForm").onsubmit = ev => {
+    ev.preventDefault(); const nm = titleCase($("sName").value.trim()); if (!nm) return;
+    const subs = subsOf(S.cats.get(cid)).map(x => ({...x}));
+    if (s) act("Rename sub-category", () => patchCat(cid, {subs:subs.map(x => x.id === sid ? {...x, name:nm} : x)}));
+    else { S.collapsed.delete(cid); store.set("collapsed", [...S.collapsed]); act("Add sub-category", () => patchCat(cid, {subs:[...subs, {id:newId("s"), name:nm}]})); }
+    m.innerHTML = "";
+  };
+  $("sName").focus();
+}
+function openCatModal(cid){
+  const c = cid ? S.cats.get(cid) : null;
+  let tags = c ? [...(c.tags || [])] : [];
+  const m = $("modal");
+  const draw = (name) => {
+    m.innerHTML = `<div class="scrim" data-act="modal-bg"><form class="modal" id="catForm">
+      <h2>${c ? "Edit Category" : "New Category"}</h2>
+      <div class="field"><label for="cName">Name</label><input id="cName" class="in" value="${esc(name)}" placeholder="e.g. Marketing" required></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="modal-close">Cancel</button><button class="btn primary" type="submit">${c ? "Save" : "Add Category"}</button></div>
+    </form></div>`;
+    $("catForm").onsubmit = ev => {
+      ev.preventDefault(); const nm = titleCase($("cName").value.trim()); if (!nm) return;
+      if (c) act("Edit category", () => patchCat(c.id, {name:nm}));
+      else act("Add category", () => put("cat", newId("c"), {name:nm, tags, order:Math.max(0, ...catsSorted().map(x => x.order ?? 0)) + 1}));
+      m.innerHTML = "";
+    };
+  };
+  draw(c ? c.name : ""); $("cName").focus();
+}
+
+/* ---------- confetti when a task is marked done, fired from wherever Done was clicked (task list or task details) ---------- */
+let shoot = null;
+function celebrate(el){
+  if (!window.confetti || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  try {
+    if (!shoot){
+      const cv = document.createElement("canvas");
+      cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:200";
+      document.body.appendChild(cv);
+      shoot = confetti.create(cv, {resize:true, useWorker:false});
+    }
+    /* the team's bar colours, so the confetti matches the chart (and follows any colour changes) */
+    const colors = [...new Set(TEAM.map(p => personColor(p.name).fill))];
+    const r = el.getBoundingClientRect(), origin = {x:(r.left + r.width / 2) / innerWidth, y:(r.top + r.height / 2) / innerHeight};
+    shoot({colors, origin, particleCount:80, spread:80, startVelocity:32, gravity:1.1, ticks:180, scalar:.9});
+    shoot({colors, origin, particleCount:30, spread:140, startVelocity:22, gravity:1, ticks:160, scalar:.75, shapes:["circle"]});
+  } catch(e){}
+}
+/* lets :active (the button press) show on iPhone and iPad */
+document.addEventListener("touchstart", () => {}, {passive:true});
+
+/* ---------- toasts, two-step delete ---------- */
+function toast(msg, withUndo){
+  const el = document.createElement("div"); el.className = "toast";
+  el.innerHTML = `<span>${esc(msg)}</span>${withUndo ? `<button>Undo</button>` : ""}`;
+  if (withUndo) el.querySelector("button").onclick = () => { undo(); el.remove(); };
+  const box = $("toasts"); while (box.children.length > 2) box.firstChild.remove();
+  box.appendChild(el); setTimeout(() => el.remove(), 5000);
+}
+function armDelete(btn, label, fn){
+  if (btn.classList.contains("confirm")){ fn(); return; }
+  btn.classList.add("confirm"); const old = btn.innerHTML; btn.innerHTML = label;
+  setTimeout(() => { if (btn.isConnected){ btn.classList.remove("confirm"); btn.innerHTML = old; } }, 3500);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", ev => {
+  const a = ev.target.closest("[data-act]"); if (!a) return;
+  const act_ = a.dataset.act, row = a.closest("[data-task]"), catRow = a.closest("[data-cat]");
+  const tid = row && row.dataset.task, cid = catRow && catRow.dataset.cat;
+  switch (act_){
+    case "zoom": { const keep = S.r0 ? fmt(S.r0 + Math.round(($("board").scrollLeft + 160) / dayW()) * DAY) : TODAY; S.zoom = a.dataset.z; store.set("zoom", S.zoom); render(); scrollToDate(keep); break; }
+    case "today": scrollToDate(TODAY, true); break;
+    case "menu": { const w = a.closest(".menuwrap"), on = !w.classList.contains("open"); closePops(); w.classList.toggle("open", on); a.setAttribute("aria-expanded", on); break; }
+    case "jump-flag": {
+      /* step through the late (or blocked) tasks in the order they appear in the list, opening whatever hides them */
+      const set = computeFlags()[a.dataset.k], ids = catsSorted().flatMap(c => groupsOf(c.id).flatMap(g => g.tasks)).filter(t => set.has(t.id)).map(t => t.id);
+      if (!ids.length) break;
+      const id = ids[(ids.indexOf(S.selId) + 1) % ids.length], t = S.tasks.get(id);
+      for (const k of [t.cat, t.cat + "/" + t.sub]) S.collapsed.delete(k); store.set("collapsed", [...S.collapsed]);
+      selectTask(id); scrollToTask(id); break;
+    }
+    case "legend": { const w = $("legwrap"), on = w.classList.toggle("open"); a.setAttribute("aria-expanded", on); break; }
+    case "away-top": $("board").scrollTo({top:0, behavior:"smooth"}); break;
+    case "notes": toggleNotes(); break;
+    case "edit-summary": S.editingSummary = true; renderNotes(); { const t = $("sumEdit"); if (t) t.focus(); } break;
+    case "cancel-summary": S.editingSummary = false; renderNotes(); break;
+    case "save-summary": { const v = $("sumEdit").value; S.summary = v; S.editingSummary = false; if (S.db) enqueue("notes/summary", () => S.db.doc("notes/summary").set({text:v, updated:Date.now()})); renderNotes(); break; }
+    case "del-log": { const id = a.dataset.id; armDelete(a, "Delete?", () => { S.log = S.log.filter(e => e.id !== id); if (S.db) enqueue("changelog/" + id, () => S.db.doc("changelog/" + id).delete()); renderNotes(); }); break; }
+    case "undo": undo(); break;
+    case "redo": redo(); break;
+    case "test": S.test ? endTest() : startTest(S.openId); break;
+    case "test-reset": S.test.hist.push(testSnap()); S.test.changes = new Map(); S.test.away = new Map(); render(); break;
+    case "test-apply": { const ch = diffMap(), ac = awayDiff(); const n = ch.size + ac.size; act(`Apply ${plural(n, "change")} from test mode`, () => { for (const [k, c] of ch) patchTask(k, {start:c.to.start, end:c.to.end}); for (const [k, c] of ac) patchAway(k, {start:c.to.start, end:c.to.end}); }); S.test = null; render(); toast(`Applied ${plural(n, "change")} to the real plan.`, true); break; }
+    case "add-cat": if (S.canWrite && !S.test) openCatModal(null); break;
+    case "edit-cat": openCatModal(cid); break;
+    case "del-cat": { const n = tasksOf(cid).length; armDelete(a, n ? `Delete ${n} Task${n === 1 ? "" : "s"}?` : "Delete?", () => { const name = S.cats.get(cid).name; act(`Delete “${name}”`, () => { for (const t of tasksOf(cid)) removeTask(t.id); put("cat", cid, null); }); toast(`Deleted “${name}” and ${plural(n, "task")}.`, true); }); break; }
+    case "toggle": S.collapsed.has(cid) ? S.collapsed.delete(cid) : S.collapsed.add(cid); store.set("collapsed", [...S.collapsed]); render(); break;
+    case "toggle-sub": { const k = cid + "/" + a.closest("[data-sub]").dataset.sub; S.collapsed.has(k) ? S.collapsed.delete(k) : S.collapsed.add(k); store.set("collapsed", [...S.collapsed]); render(); break; }
+    case "add-sub": if (S.canWrite && !S.test) openSubModal(cid, null); break;
+    case "edit-sub": openSubModal(cid, a.closest("[data-sub]").dataset.sub); break;
+    case "del-sub": { const sid = a.closest("[data-sub]").dataset.sub, c = S.cats.get(cid), sb = subsOf(c).find(x => x.id === sid); if (!sb) break;
+      armDelete(a, "Remove?", () => { act(`Remove sub-category “${sb.name}”`, () => { for (const t of tasksOf(cid)) if (t.sub === sid) patchTask(t.id, {sub:null}); patchCat(cid, {subs:subsOf(S.cats.get(cid)).filter(x => x.id !== sid)}); }); toast(`Removed “${titleCase(sb.name)}”. Its tasks are still in ${titleCase(c.name)}.`, true); }); break; }
+    case "add-task": { S.collapsed.delete(cid); const sr = a.closest(".addrow[data-sub]"), sub = sr ? sr.dataset.sub : null; const id = newId("t"); act("Add task", () => put("task", id, {cat:cid, name:"New Task", status:"todo", owners:[], notes:"", deps:[], start:null, end:null, order:nextOrder(cid), ...(sub ? {sub} : {})})); openDrawer(id, true); break; }
+    case "open": openDrawer(tid); scrollToTask(tid); break;
+    case "cycle": { if (!S.canWrite || S.test) break; const t = S.tasks.get(tid), nx = NEXT_STATUS[t.status || "todo"]; if (nx === "done") celebrate(a); act("Change status", () => patchTask(tid, {status:nx})); break; }
+    case "del-task": armDelete(a, "Delete?", () => { const t = S.tasks.get(tid); act(`Delete “${t.name}”`, () => removeTask(tid)); toast(`Deleted “${t.name}”.`, true); }); break;
+    case "close": closeDrawer(); break;
+    case "sel-open": S.selPerson ? openPerson(S.selPerson) : S.selAway ? openAway(S.selAway) : openDrawer(S.selId); break;
+    case "show-clashes": showClashes(a.dataset.p); break;
+    case "milestones": if (S.canWrite && !S.test) openMilestones(); break;
+    case "set-pcolor": { const n = a.dataset.p, k = a.dataset.k; if (TEAM.some(x => x.name !== n && personColorKey(x.name) === k)) break; act(`Change ${n}'s colour`, () => put("settings", "plan", {...S.settings, personColors:{...(S.settings.personColors || {}), [n]:k}})); break; }
+    case "open-person": openPerson(a.dataset.p); break;
+    case "toggle-away-item": { S.openAway = S.openAway === a.dataset.id ? null : a.dataset.id; render(); break; }
+    case "sel-clear": clearSelection(); break;
+    case "toggle-list": S.listNarrow = !S.listNarrow; store.set("listNarrow", S.listNarrow); render(); break;
+    case "set-status": { const t = S.tasks.get(S.openId); if (a.dataset.s === "done" && t && t.status !== "done") celebrate(a); act("Change status", () => patchTask(S.openId, {status:a.dataset.s})); break; }
+    case "cl-new": { const nw = $("clNew"); if (nw && nw._add){ nw._add(); const n2 = $("clNew"); if (n2) n2.focus(); } break; }
+    case "cl-toggle": { const ci = a.dataset.ci; editChecklist(S.openId, "Tick a todo", c => { const it = c.items.find(x => x.id === ci); if (!it) return false; it.done = !it.done; }); break; }
+    case "cl-del": { const ci = a.dataset.ci; editChecklist(S.openId, "Remove a todo", c => { c.items = c.items.filter(x => x.id !== ci); }); break; }
+    case "toggle-owner": { const t = S.tasks.get(S.openId), p = a.dataset.p, cur = ownersOf(t); act("Change who's assigned", () => setOwners(t.id, cur.includes(p) ? cur.filter(x => x !== p) : [...cur, p])); break; }
+    case "clear-leave": { const t = S.tasks.get(S.openId), r = clearOfLeave(t, +a.dataset.dir); if (r) proposeChange(t.id, r.start, r.end); break; }
+    case "goto-task": openDrawer(a.dataset.id); scrollToTask(a.dataset.id); break;
+    case "del-away": armDelete(a, `<span class="ms">delete</span>Yes, Delete It`, () => { const x = S.away.get(a.dataset.id); if (!x) return; act(`Delete ${x.person}'s time away`, () => put("away", x.id, null)); S.openAway = null; render(); toast(`Deleted ${x.person}'s time away.`, true); }); break;
+    case "toggle-tag": { const t = S.tasks.get(S.openId), tg = a.dataset.tag, cur = t.tags || []; act("Change tags", () => patchTask(t.id, {tags:cur.includes(tg) ? cur.filter(x => x !== tg) : [...cur, tg]})); break; }
+    case "clear-dates": act("Remove dates", () => patchTask(S.openId, {start:null, end:null})); break;
+    case "rm-dep": { const t = S.tasks.get(S.openId); act("Remove a dependency", () => patchTask(t.id, {deps:(t.deps || []).filter(d => d !== a.dataset.d)})); break; }
+    case "delay": { const t = S.tasks.get(S.openId), e = eff(t); proposeChange(t.id, e.start, addDays(e.end, +a.dataset.n)); break; }
+    case "drawer-del": armDelete(a, `<span class="ms">delete</span>Yes, Delete It`, () => { const t = S.tasks.get(S.openId); act(`Delete “${t.name}”`, () => removeTask(t.id)); toast(`Deleted “${t.name}”.`, true); }); break;
+    case "pv-all": { const p = S.preview, n = p.changes.size; S.preview = null; commitChanges(`Move ${plural(n, "task")}`, p.changes); toast(`Moved ${plural(n, "task")}.`, true); break; }
+    case "pv-one": { const p = S.preview, o = S.tasks.get(p.origin); S.preview = null; commitChanges(`Move “${o.name}”`, new Map([[p.origin, p.changes.get(p.origin)]])); break; }
+    case "pv-cancel": S.preview = null; render(); break;
+    case "modal-close": $("modal").innerHTML = ""; break;
+    case "modal-bg": if (ev.target === a) $("modal").innerHTML = ""; break;
+  }
+});
+document.addEventListener("keydown", ev => {
+  const typing = ev.target && (ev.target.tagName === "TEXTAREA" || ev.target.tagName === "SELECT" || (ev.target.tagName === "INPUT" && !["checkbox","radio","button"].includes(ev.target.type)));
+  const mod = ev.metaKey || ev.ctrlKey, k = ev.key.toLowerCase();
+  if (mod && (k === "z" || k === "y") && !typing){
+    ev.preventDefault();
+    if (k === "y" || ev.shiftKey) redo(); else undo();
+    return;
+  }
+  if (ev.key !== "Escape") return;
+  if ($("modal").innerHTML){ $("modal").innerHTML = ""; return; }
+  if (S.preview){ S.preview = null; render(); return; }
+  if ((S.openId || S.openAway || S.openPerson) && !typing) closeDrawer();
+  else if (S.notesOpen && !typing){ S.notesOpen = false; renderNotes(); }
+  else if ((S.selId || S.selAway || S.selPerson) && !typing) clearSelection();
+});
+
+$("board").addEventListener("scroll", () => updateAwayMini(), {passive:true});
+/* the legend popup closes on a click anywhere else, or Escape */
+const closePops = keep => document.querySelectorAll(".legwrap.open,.menuwrap.open").forEach(w => { if (w === keep) return; w.classList.remove("open"); const b = w.querySelector(".btn"); if (b) b.setAttribute("aria-expanded", "false"); });
+document.addEventListener("pointerdown", ev => closePops(ev.target.closest(".legwrap,.menuwrap")));
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") closePops(); });
+/* picking something from a menu closes it */
+document.addEventListener("click", ev => { if (ev.target.closest(".menu button")) closePops(); });
+/* drag a todo by its handle to reorder the checklist in task details */
+let cld = null;
+$("drawer").addEventListener("pointerdown", ev => {
+  const hd = ev.target.closest(".cldrag[data-ci]"); if (!hd || ev.button > 0) return;
+  const item = hd.closest(".clitem"); if (!item) return;
+  ev.preventDefault();
+  cld = {id:hd.dataset.ci, item, to:null};
+  try { hd.setPointerCapture(ev.pointerId); } catch(e){}
+  item.classList.add("cldragging"); document.body.classList.add("rdrag");
+});
+window.addEventListener("pointermove", ev => {
+  if (!cld) return;
+  const items = [...$("drawer").querySelectorAll(".clitem")];
+  items.forEach(el => el.classList.remove("dropbefore", "dropafter"));
+  let to = items.length;
+  for (let i = 0; i < items.length; i++){ const r = items[i].getBoundingClientRect(); if (ev.clientY < r.top + r.height / 2){ to = i; break; } }
+  const from = items.findIndex(el => { const h = el.querySelector(".cldrag"); return h && h.dataset.ci === cld.id; });
+  if (from < 0 || to === from || to === from + 1){ cld.to = null; return; }
+  cld.to = to;
+  if (to < items.length) items[to].classList.add("dropbefore"); else items[items.length - 1].classList.add("dropafter");
+});
+const endClDrag = ev => {
+  if (!cld) return; const d = cld; cld = null;
+  document.body.classList.remove("rdrag");
+  $("drawer").querySelectorAll(".clitem").forEach(el => el.classList.remove("dropbefore", "dropafter", "cldragging"));
+  if (ev.type === "pointerup" && d.to !== null) editChecklist(S.openId, "Reorder todos", c => { const from = c.items.findIndex(x => x.id === d.id); if (from < 0) return false; const [it] = c.items.splice(from, 1); c.items.splice(d.to > from ? d.to - 1 : d.to, 0, it); });
+};
+window.addEventListener("pointerup", endClDrag); window.addEventListener("pointercancel", endClDrag);
+$("board").addEventListener("dblclick", ev => { const bar = ev.target.closest(".bar"); if (bar && !S.preview && bar.dataset.kind !== "away") openDrawer(bar.dataset.bar); });
+/* drag across empty days to give an undated task its dates, or to add time away on someone's row. A plain click sets a single day */
+let lastDragEnd = 0, mk = null;
+const dayAt = (track, x) => Math.max(0, Math.min(S.days - 1, Math.floor((x - track.getBoundingClientRect().left) / dayW())));
+$("board").addEventListener("pointerdown", ev => {
+  if (ev.button !== 0 || S.preview || !S.canWrite || ev.target.closest(".bar")) return;
+  const tr = ev.target.closest("[data-place],[data-awayplace]"); if (!tr) return;
+  if (ev.pointerType === "touch") return;
+  const away = !!tr.dataset.awayplace;
+  if (away && S.test){ toast("Exit Test Mode to add time away."); return; }
+  ev.preventDefault();
+  mk = {away, key:away ? tr.dataset.awayplace : tr.dataset.place, track:tr, k0:dayAt(tr, ev.clientX), k1:null, pid:ev.pointerId, el:null, tip:null};
+  mk.k1 = mk.k0; S.dragging = true;
+  mk.el = document.createElement("div"); mk.el.className = "bar draft"; tr.appendChild(mk.el);
+  mk.tip = document.createElement("div"); mk.tip.className = "dragtip"; document.body.appendChild(mk.tip);
+  drawDraft(ev);
+});
+function drawDraft(ev){
+  const W = dayW(), a = Math.min(mk.k0, mk.k1), b = Math.max(mk.k0, mk.k1);
+  mk.el.style.left = (a*W + 2) + "px"; mk.el.style.width = ((b - a + 1)*W - 4) + "px";
+  const s = fmt(S.r0 + a*DAY), e = fmt(S.r0 + b*DAY);
+  mk.el.textContent = mk.away ? "Away" : "";
+  mk.tip.textContent = `${nice(s)} to ${nice(e)} · ${plural(b - a + 1, "day")}`;
+  mk.tip.style.left = (ev.clientX + 14) + "px"; mk.tip.style.top = (ev.clientY + 16) + "px";
+}
+window.addEventListener("pointermove", ev => { if (!mk || ev.pointerId !== mk.pid) return; ev.preventDefault(); mk.k1 = dayAt(mk.track, ev.clientX); drawDraft(ev); }, {passive:false});
+const endMake = ev => {
+  if (!mk || (ev && ev.pointerId !== mk.pid)) return;
+  const m = mk; mk = null; S.dragging = false; lastDragEnd = Date.now();
+  m.el.remove(); m.tip.remove(); $("board")._html = null;
+  if (ev && ev.type === "pointercancel"){ render(); return; }
+  const a = Math.min(m.k0, m.k1), b = Math.max(m.k0, m.k1), s = fmt(S.r0 + a*DAY), e = fmt(S.r0 + b*DAY);
+  if (m.away){ addAway(m.key, s, e); return; }
+  S.selId = m.key; S.selAt = Date.now();
+  proposeChange(m.key, s, e); render();
+};
+window.addEventListener("pointerup", endMake);
+window.addEventListener("pointercancel", endMake);
+/* clicking empty chart space deselects */
+$("board").addEventListener("click", ev => {
+  if ((!S.selId && !S.selAway && !S.selPerson) || S.openId || S.openAway || S.openPerson || Date.now() - (S.selAt || 0) < 350 || Date.now() - lastDragEnd < 350) return;
+  if (ev.target.closest(".bar, .label, [data-place], [data-awayplace], .head, button")) return;
+  clearSelection();
+});
+
+/* drag to move, drag the ends to resize */
+let drag = null;
+$("board").addEventListener("pointerdown", ev => {
+  const bar = ev.target.closest(".bar"); if (!bar || ev.button !== 0) return;
+  const id = bar.dataset.bar, kind = bar.dataset.kind || "task";
+  const e = kind === "away" ? effAway(S.away.get(id)) : eff(S.tasks.get(id));
+  if (S.preview || !S.canWrite){ if (!S.preview) kind === "away" ? selectAway(id) : selectTask(id); return; }
+  const h = ev.target.closest("[data-h]");
+  drag = {id, kind, bar, mode:h ? h.dataset.h : "move", x0:ev.clientX, s0:e.start, e0:e.end, s:e.start, e:e.end, moved:false, pid:ev.pointerId};
+});
+window.addEventListener("pointermove", ev => {
+  if (!drag || ev.pointerId !== drag.pid) return;
+  const dx = ev.clientX - drag.x0;
+  if (!drag.moved && Math.abs(dx) < 4) return;
+  if (!drag.moved){ drag.moved = true; S.dragging = true; drag.bar.classList.add("dragging"); try { drag.bar.setPointerCapture(drag.pid); } catch(e){} drag.tip = document.createElement("div"); drag.tip.className = "dragtip"; document.body.appendChild(drag.tip); }
+  ev.preventDefault();
+  const n = Math.round(dx / dayW());
+  let s = drag.s0, e = drag.e0;
+  if (drag.mode === "move"){ s = addDays(s, n); e = addDays(e, n); }
+  else if (drag.mode === "l"){ s = addDays(s, n); if (s > e) s = e; }
+  else { e = addDays(e, n); if (e < s) e = s; }
+  drag.s = s; drag.e = e;
+  const W = dayW();
+  drag.bar.style.left = (idx(s)*W + 2) + "px"; drag.bar.style.width = ((diff(s, e) + 1)*W - 4) + "px";
+  drag.tip.textContent = `${nice(s)} to ${nice(e)} · ${plural(diff(s, e) + 1, "day")}`;
+  drag.tip.style.left = (ev.clientX + 14) + "px"; drag.tip.style.top = (ev.clientY + 16) + "px";
+}, {passive:false});
+const endDrag = ev => {
+  if (!drag || (ev && ev.pointerId !== drag.pid)) return;
+  const d = drag; drag = null; S.dragging = false;
+  if (d.tip) d.tip.remove();
+  if (d.moved){ $("board")._html = null; lastDragEnd = Date.now(); }
+  if (!d.moved){
+    /* one click selects (bottom chip), a second click on the same bar opens its details */
+    const now = Date.now(), dbl = lastBarClick.id === d.id && now - lastBarClick.at < 400;
+    lastBarClick = {id:d.id, at:now};
+    const open = dbl || S.openId || S.openPerson;
+    if (d.kind === "away") open ? openAway(d.id) : selectAway(d.id);
+    else open ? openDrawer(d.id) : selectTask(d.id);
+    return;
+  }
+  if (d.kind === "away"){ if (d.s !== d.s0 || d.e !== d.e0) proposeAway(d.id, d.s, d.e); else render(); return; }
+  if (d.s !== d.s0 || d.e !== d.e0) proposeChange(d.id, d.s, d.e); else render();
+};
+window.addEventListener("pointerup", endDrag);
+window.addEventListener("pointercancel", ev => { if (drag){ drag.s = drag.s0; drag.e = drag.e0; endDrag(ev); } });
+
+/* drag in the task list to reorder tasks within a category, or whole categories */
+let rd = null, suppressClick = false;
+$("board").addEventListener("pointerdown", ev => {
+  if (ev.button !== 0 || S.test || S.preview || !S.canWrite) return;
+  const label = ev.target.closest(".label"); if (!label) return;
+  const row = label.parentElement;
+  if (!row || row.classList.contains("addrow") || row.classList.contains("head") || row.classList.contains("awayrow")) return;
+  const handle = ev.target.closest(".drag-h");
+  if (ev.pointerType === "touch" && !handle) return;
+  if (!handle && ev.target.closest("button:not(.tname):not(.cat-name),input,select")) return;
+  if (row.classList.contains("subcat")){ rd = {kind:"sub", id:row.dataset.sub, cid:row.dataset.cat, row, y0:ev.clientY, pid:ev.pointerId, on:false}; return; }
+  if (row.classList.contains("cat")) rd = {kind:"cat", id:row.dataset.cat, row, y0:ev.clientY, pid:ev.pointerId, on:false};
+  else if (row.dataset.task) rd = {kind:"task", id:row.dataset.task, cid:row.dataset.cid, row, y0:ev.clientY, pid:ev.pointerId, on:false};
+});
+/* every place the dragged item could land: between tasks in any open category, or at the end of a closed one */
+function reorderSlots(){
+  const g = $("grid"), slots = [];
+  if (rd.kind === "sub"){
+    /* a sub-category can land before any sub-category in its own category, or after the last one */
+    const srows = [...g.querySelectorAll(`.row.subcat[data-cat="${rd.cid}"]`)];
+    srows.forEach((r, i) => slots.push({index:i, top:r.offsetTop}));
+    const loose = g.querySelector(`.row.task[data-cid="${rd.cid}"][data-sub=""]`) || g.querySelector(`.addrow[data-cat="${rd.cid}"]:not([data-sub])`), lastRow = srows[srows.length - 1];
+    slots.push({index:srows.length, top:loose ? loose.offsetTop : lastRow.offsetTop + lastRow.offsetHeight});
+    return slots;
+  }
+  if (rd.kind === "task"){
+    for (const crow of g.querySelectorAll(".row.cat:not(.awayrow):not(.subcat)")){
+      const cid = crow.dataset.cat, add = g.querySelector(`.addrow[data-cat="${cid}"]:not([data-sub])`);
+      if (crow.classList.contains("collapsed")){ slots.push({cid, sub:null, before:null, top:crow.offsetTop + crow.offsetHeight, catRow:crow}); continue; }
+      let bottom = crow.offsetTop + crow.offsetHeight;
+      for (const gr of groupsOf(cid)){
+        const sid = gr.sub ? gr.sub.id : "", rows = [...g.querySelectorAll(`.row.task[data-cid="${cid}"][data-sub="${sid}"]`)];
+        const srow = gr.sub ? g.querySelector(`.row.subcat[data-cat="${cid}"][data-sub="${sid}"]`) : null;
+        if (srow) bottom = srow.offsetTop + srow.offsetHeight;
+        if (!rows.length){
+          /* an empty or closed sub-category takes a drop on its own row; an empty category takes it just above Add Task */
+          if (srow) slots.push({cid, sub:sid, before:null, top:bottom, catRow:srow});
+          else slots.push({cid, sub:null, before:null, top:add ? add.offsetTop : bottom, catRow:subsOf(S.cats.get(cid)).length ? null : crow});
+          continue;
+        }
+        rows.forEach(r => slots.push({cid, sub:sid || null, before:r.dataset.task, top:r.offsetTop}));
+        const last = rows[rows.length - 1]; bottom = last.offsetTop + last.offsetHeight;
+        slots.push({cid, sub:sid || null, before:null, after:last.dataset.task, top:bottom});
+        const sadd = srow && g.querySelector(`.addrow[data-cat="${cid}"][data-sub="${sid}"]`); if (sadd) bottom = sadd.offsetTop + sadd.offsetHeight;
+      }
+    }
+    return slots;
+  }
+  const rows = [...g.querySelectorAll(".row.cat:not(.awayrow):not(.subcat)")], all = [...g.querySelectorAll(".row")], last = all[all.length - 1];
+  rows.forEach((r, i) => slots.push({index:i, top:r.offsetTop}));
+  slots.push({index:rows.length, top:last.offsetTop + last.offsetHeight});
+  return slots;
+}
+window.addEventListener("pointermove", ev => {
+  if (!rd || ev.pointerId !== rd.pid) return;
+  if (!rd.on){
+    if (Math.abs(ev.clientY - rd.y0) < 6) return;
+    rd.on = true; S.dragging = true; document.body.classList.add("rdrag"); rd.row.classList.add("reordering");
+    rd.line = document.createElement("div"); rd.line.className = "dropline"; $("grid").appendChild(rd.line);
+  }
+  ev.preventDefault();
+  const b = $("board"), br = b.getBoundingClientRect();
+  if (ev.clientY < br.top + 80) b.scrollTop -= 14; else if (ev.clientY > br.bottom - 40) b.scrollTop += 14;
+  const y = ev.clientY - $("grid").getBoundingClientRect().top;
+  const slots = reorderSlots();
+  let best = slots[0]; for (const sl of slots) if (Math.abs(sl.top - y) < Math.abs(best.top - y)) best = sl;
+  rd.slot = best;
+  document.querySelectorAll(".row.cat.droptarget").forEach(r => r.classList.remove("droptarget"));
+  if (best.catRow) best.catRow.classList.add("droptarget");
+  rd.line.style.top = (best.top - 1) + "px"; rd.line.style.left = (b.scrollLeft + 4) + "px";
+  rd.line.style.width = (rd.row.querySelector(".label").offsetWidth - 8) + "px";
+}, {passive:false});
+window.addEventListener("pointerup", ev => {
+  if (!rd || ev.pointerId !== rd.pid) return;
+  const d = rd; rd = null;
+  if (!d.on) return;
+  suppressClick = true; setTimeout(() => suppressClick = false, 0);
+  $("board")._html = null;
+  document.body.classList.remove("rdrag"); if (d.line) d.line.remove(); S.dragging = false;
+  document.querySelectorAll(".row.cat.droptarget").forEach(r => r.classList.remove("droptarget"));
+  const sl = d.slot; if (!sl){ render(); return; }
+  if (d.kind === "task"){
+    const t = S.tasks.get(d.id), nc = S.cats.get(sl.cid);
+    /* work out the new order group by group (each sub-category, then the loose tasks), then renumber the whole category */
+    const cur = groupsOf(sl.cid).map(g => ({sid:g.sub ? g.sub.id : null, ids:g.tasks.map(x => x.id)}));
+    const before = cur.flatMap(g => g.ids), was = cur.find(g => g.ids.includes(d.id));
+    const next = cur.map(g => ({sid:g.sid, ids:g.ids.filter(x => x !== d.id)}));
+    const tg = next.find(g => g.sid === (sl.sub || null)) || next[next.length - 1];
+    let pos = sl.before ? tg.ids.indexOf(sl.before) : (sl.after ? tg.ids.indexOf(sl.after) + 1 : tg.ids.length);
+    if (pos < 0) pos = tg.ids.length;
+    tg.ids.splice(pos, 0, d.id);
+    const ids = next.flatMap(g => g.ids);
+    if (tg.sid && S.collapsed.delete(sl.cid + "/" + tg.sid)) store.set("collapsed", [...S.collapsed]);
+    if (sl.cid === d.cid){
+      const sameSub = was && was.sid === tg.sid;
+      if (sameSub && ids.join() === before.join()){ render(); return; }
+      act(sameSub ? "Reorder tasks" : `Move “${t.name}”`, () => { if (!sameSub) patchTask(d.id, {sub:tg.sid}); ids.forEach((id, i) => { if (S.tasks.get(id).order !== i + 1) patchTask(id, {order:i + 1}); }); });
+      return;
+    }
+    act(`Move “${t.name}” to ${nc.name}`, () => {
+      patchTask(d.id, {cat:sl.cid, sub:tg.sid, order:ids.indexOf(d.id) + 1, tags:(t.tags || []).filter(x => (nc.tags || []).includes(x))});
+      ids.forEach((id, i) => { if (id !== d.id && S.tasks.get(id).order !== i + 1) patchTask(id, {order:i + 1}); });
+    });
+    S.collapsed.delete(sl.cid); store.set("collapsed", [...S.collapsed]); render();
+    toast(`Moved “${titleCase(t.name)}” to ${titleCase(nc.name)}.`, true);
+    return;
+  }
+  if (d.kind === "sub"){
+    const subs = subsOf(S.cats.get(d.cid)).map(x => ({...x})), from = subs.findIndex(x => x.id === d.id);
+    let to = sl.index; if (to > from) to--;
+    if (from < 0 || to === from){ render(); return; }
+    const [mv] = subs.splice(from, 1); subs.splice(to, 0, mv);
+    act("Reorder sub-categories", () => patchCat(d.cid, {subs}));
+    return;
+  }
+  const ids = catsSorted().map(c => c.id);
+  const from = ids.indexOf(d.id); let to = sl.index; if (to > from) to--;
+  if (from < 0 || to === from){ render(); return; }
+  ids.splice(from, 1); ids.splice(to, 0, d.id);
+  act("Reorder categories", () => ids.forEach((id, i) => { if (S.cats.get(id).order !== i + 1) patchCat(id, {order:i + 1}); }));
+});
+document.addEventListener("click", ev => { if (suppressClick){ suppressClick = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
+
+/* ---------- data ---------- */
+(async () => {
+  let db = null;
+  try { db = window.GanttDB ? await window.GanttDB.connect() : null; } catch(e){ db = null; }
+  if (!db){ S.dbFailed = true; render(); return; }
+  S.db = db;
+  const fail = err => { if (err && err.code === "revoked"){ S.canWrite = false; document.body.classList.add("readonly"); } else toast("Lost the live connection. Reload the page to reconnect."); };
+  db.collection("categories").onSnapshot(snap => { S.cats = new Map(snap.docs.map(d => [d.id, {id:d.id, ...d.data()}])); S.loaded.c = true; render(); }, fail);
+  db.collection("tasks").onSnapshot(snap => {
+    S.tasks = new Map(snap.docs.map(d => [d.id, {id:d.id, ...d.data()}])); S.loaded.t = true;
+    if (S.preview && ![...S.preview.changes.keys()].every(k => S.tasks.has(k))) S.preview = null;
+    if (S.test) for (const k of [...S.test.changes.keys()]) if (!S.tasks.has(k)) S.test.changes.delete(k);
+    render();
+  }, fail);
+  db.collection("away").onSnapshot(snap => {
+    S.away = new Map(snap.docs.map(d => [d.id, {id:d.id, ...d.data()}]));
+    if (S.test) for (const k of [...S.test.away.keys()]) if (!S.away.has(k)) S.test.away.delete(k);
+    render();
+  }, fail);
+  db.doc("notes/summary").onSnapshot(d => { S.summary = d.exists ? (d.data().text || "") : ""; S.sumUpdated = d.exists ? d.data().updated : null; S.sumLoaded = true; if (!S.editingSummary) renderNotes(); }, fail);
+  db.collection("changelog").onSnapshot(snap => { S.log = snap.docs.map(d => ({id:d.id, ...d.data()})); S.logLoaded = true; renderNotes(); }, fail);
+  db.doc("settings/plan").onSnapshot(d => { if (d.exists){ S.settings = {...S.settings, ...d.data()}; render(); } }, fail);
+})();
+</script>
+</body>
+</html>

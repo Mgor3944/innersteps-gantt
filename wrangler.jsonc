@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "innersteps-gantt",
+  "compatibility_date": "2025-10-01",
+  // the whole site is static files; the data lives in Supabase (see CLAUDE.md)
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "gantt.innersteps.org", "custom_domain": true }],
+  "workers_dev": true,
+  "observability": { "enabled": true }
+}
