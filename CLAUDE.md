@@ -2,6 +2,8 @@
 
 The Series 2 Launch Plan, an interactive Gantt chart used for the whole team's product management.
 Live at `https://gantt.innersteps.org` (Cloudflare Worker `innersteps-gantt`, deployed from `main`).
+Workers Builds also runs on branch pushes and those builds fail within seconds; judge a deploy by the build for `main`
+(`gh api repos/Mgor3944/innersteps-gantt/commits/<sha>/check-runs?filter=all`, the run with a Version ID).
 It began as a Claude artifact; this repo is now the source of truth.
 
 ## Hard rules
