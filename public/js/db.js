@@ -169,19 +169,14 @@
     return new Promise(resolve => {
       const el = document.createElement("div");
       el.className = "signin"; el.id = "signin";
-      el.innerHTML = `<div class="si-panel">
-        <div class="si-art"><img class="si-shot" src="/img/signin.webp" alt=""></div>
-        <div class="si-side">
-          <div class="si-top"><span>InnerSteps Gantt Chart Software</span></div>
-          <form class="si-form">
-            <h2>Sign In</h2>
-            <p class="si-copy">Opening your personal link signs you in automatically. If you're seeing this screen, paste it below. You only do this once per device.</p>
-            <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
-            <button class="btn primary" type="submit">Sign In</button>
-            <p class="si-msg" id="signinMsg" role="status"></p>
-          </form>
-        </div>
-      </div>`;
+      el.innerHTML = `<div class="si-top"><img src="/img/logo.svg" alt="InnerSteps"><span>InnerSteps Gantt Chart Software</span></div>
+        <form class="si-form">
+          <h2>Sign In</h2>
+          <p class="si-copy">Opening your personal link signs you in automatically. If you're seeing this screen, paste it below. You only do this once per device.</p>
+          <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
+          <button class="btn primary" type="submit">Sign In</button>
+          <p class="si-msg" id="signinMsg" role="status"></p>
+        </form>`;
       el.querySelector("#signinMsg").textContent = message || "";
       document.body.appendChild(el);
       const input = el.querySelector("#signinKey"), msg = el.querySelector("#signinMsg");
