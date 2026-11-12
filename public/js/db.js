@@ -175,7 +175,7 @@
           <div class="si-top"><img src="/img/logo.svg" alt="InnerSteps"><span>InnerSteps Gantt Chart Software</span></div>
           <form class="si-form">
             <h2>Sign In</h2>
-            <p class="si-copy">Open your personal sign-in link, or paste it here. You only need to do this once on each device.</p>
+            <p class="si-copy">Opening your personal sign-in link signs you in automatically. If you're seeing this screen, paste that link below. You only need to do this once on each device.</p>
             <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
             <button class="btn primary" type="submit">Sign In</button>
             <p class="si-msg" id="signinMsg" role="status"></p>
