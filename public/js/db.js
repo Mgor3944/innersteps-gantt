@@ -169,8 +169,7 @@
     return new Promise(resolve => {
       const el = document.createElement("div");
       el.className = "signin"; el.id = "signin";
-      el.innerHTML = `<div class="si-top"><img src="/img/logo.svg" alt="InnerSteps"></div>
-        <form class="si-form">
+      el.innerHTML = `<form class="si-form">
           <h2>Sign In</h2>
           <p class="si-copy">Welcome to the InnerSteps Gantt Chart. Paste your personal sign-in link below. You only need to do this once per device.</p>
           <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
