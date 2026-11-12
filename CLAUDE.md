@@ -51,7 +51,7 @@ The admin actions live in `GanttDB.admin` (`db.js`); the buttons and the Add Mem
 
 The chart's team (name, initials, colour, order) comes from `public.people` (`loadTeam()` in `db.js`, `setTeam()` in `index.html`;
 the `TEAM` list in the page is only a fallback). Removed people stay in `TEAM` with `active:false` so their tasks keep their name,
-but they get no Team Away row and can't be picked for new tasks. A colour changed in a person's panel is saved in `settings/plan.personColors`, which wins over `people.color`.
+but they get no Team row and can't be picked for new tasks. A colour changed in a person's panel is saved in `settings/plan.personColors`, which wins over `people.color`.
 
 The sign-in screen (`gate()` in `db.js`, `.signin` / `.si-*` styles in `index.html`): the sign-in box centred above `public/img/illustration.svg`,
 whose characters' hands rest on a black bar along the bottom (`--ih`, `--bar` on `.signin`).
