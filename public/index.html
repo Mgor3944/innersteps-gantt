@@ -507,11 +507,16 @@ button:not(:disabled):not(.tname):not(.cat-name):active,.dep.click:active{transf
 .awayitem:active,.btn:not(:disabled):active{transform:scale(.97)!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}button:active,.dep.click:active{transform:none!important}}
 
-/* sign-in screen (built in js/db.js): logo top left, title top right, the sign-in box centred */
-.signin{position:fixed;inset:0;z-index:200;background:var(--surface);display:flex;flex-direction:column;padding:24px 28px}
+/* sign-in screen (built in js/db.js): logo top left, title top right, the sign-in box centred in the space above
+   the characters, who peek up from the bottom with their hands resting on a black bar.
+   --ih is the characters' height; in the art, bodies stop 13/497 of the way up from the bottom and only the hands go lower,
+   so that line is lined up with the top of the bar */
+.signin{--ih:min(clamp(190px,36vh,330px),calc((100vw - 24px) * 497 / 904));--bar:14px;position:fixed;inset:0;z-index:200;background:var(--surface);display:flex;flex-direction:column;padding:24px 28px calc(var(--ih) + var(--bar)) 28px;overflow:hidden}
+.si-bar{position:absolute;left:0;right:0;bottom:0;height:var(--bar);background:var(--ink);z-index:1}
+.si-crew{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--bar) - var(--ih) * 13 / 497);height:var(--ih);width:auto;z-index:2;pointer-events:none;user-select:none}
 .si-top{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;font-weight:600;color:var(--muted)}
 .si-top img{width:46px;height:46px;border-radius:12px;display:block}
-.si-form{margin:auto;width:min(440px,100%);display:flex;flex-direction:column;gap:12px;padding-bottom:70px}
+.si-form{margin:auto;width:min(440px,100%);display:flex;flex-direction:column;gap:12px;padding:16px 0}
 .si-form h2{font-family:var(--font-display);font-weight:800;font-size:54px;line-height:1.05;letter-spacing:-.02em;margin:0 0 8px}
 .si-copy{margin:0 0 10px;font-size:14.5px;font-weight:500;line-height:1.55;color:var(--ink-soft)}
 .si-form .in{height:48px;border-radius:14px;font-size:14.5px}

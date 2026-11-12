@@ -176,7 +176,8 @@
           <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
           <button class="btn primary" type="submit">Sign In</button>
           <p class="si-msg" id="signinMsg" role="status"></p>
-        </form>`;
+        </form>
+        <img class="si-crew" src="/img/illustration.svg" alt=""><div class="si-bar"></div>`;
       el.querySelector("#signinMsg").textContent = message || "";
       document.body.appendChild(el);
       const input = el.querySelector("#signinKey"), msg = el.querySelector("#signinMsg");
