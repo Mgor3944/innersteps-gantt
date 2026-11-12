@@ -510,10 +510,10 @@ button:not(:disabled):not(.tname):not(.cat-name):active,.dep.click:active{transf
 /* sign-in screen (built in js/db.js): logo top left, title top right, the sign-in box centred in the space above
    the characters, who peek up from the bottom with their hands resting on a black bar.
    --ih is the characters' height; in the art, bodies stop 13/497 of the way up from the bottom and only the hands go lower,
-   so that line sits 8px below the top of the bar, letting the characters sink into it a little */
+   so that line sits 4px below the top of the bar, letting the characters sink into it a little */
 .signin{--ih:min(clamp(210px,42vh,390px),calc((100vw - 24px) * 497 / 904));--bar:14px;position:fixed;inset:0;z-index:200;background:var(--surface);display:flex;flex-direction:column;padding:24px 28px calc(var(--ih) + var(--bar)) 28px;overflow:hidden}
 .si-bar{position:absolute;left:0;right:0;bottom:0;height:var(--bar);background:var(--ink);z-index:1}
-.si-crew{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--bar) - var(--ih) * 13 / 497 - 8px);height:var(--ih);width:auto;z-index:2;pointer-events:none;user-select:none}
+.si-crew{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--bar) - var(--ih) * 13 / 497 - 4px);height:var(--ih);width:auto;z-index:2;pointer-events:none;user-select:none}
 .si-top{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;font-weight:600;color:var(--muted)}
 .si-top img{width:46px;height:46px;border-radius:12px;display:block}
 .si-form{margin:auto;width:min(440px,100%);display:flex;flex-direction:column;gap:12px;padding:16px 0}
