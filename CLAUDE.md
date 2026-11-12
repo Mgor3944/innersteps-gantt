@@ -41,7 +41,7 @@ whose password is the code. To add someone or replace a lost or leaked link, run
 Jesse and Matt (`people.admin`) can remove someone, or give them access back, from **Team Access** in the chart's menu
 (`public.set_member_active(id, active)`, which checks the caller is an admin, refuses to remove yourself and signs the removed person out).
 
-The sign-in screen (`gate()` in `db.js`, `.signin` / `.si-*` styles in `index.html`): `public/img/logo.svg` top left, "InnerSteps Gantt Chart Software" top right, the sign-in box centred above `public/img/illustration.svg`,
+The sign-in screen (`gate()` in `db.js`, `.signin` / `.si-*` styles in `index.html`): `public/img/logo.svg` top left, the sign-in box centred above `public/img/illustration.svg`,
 whose characters' hands rest on a black bar along the bottom (`--ih`, `--bar` on `.signin`).
 
 ## Testing
