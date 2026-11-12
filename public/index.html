@@ -511,13 +511,10 @@ button:not(:disabled):not(.tname):not(.cat-name):active,.dep.click:active{transf
 .signin{position:fixed;inset:0;z-index:200;background:var(--bg);padding:12px;display:flex}
 .si-panel{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,43%) minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:12px}
 .si-art{position:relative;border-radius:16px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
-/* the picture is pinned to the box's left edge and whatever doesn't fit runs off the right.
-   It starts just below the logo, so the logo sits on a clear strip instead of covering the chart's title */
-.si-shot{position:absolute;left:0;top:70px;width:100%;height:calc(100% - 70px);object-fit:cover;object-position:left top;display:block}
-.si-logo{position:absolute;top:20px;left:20px;width:46px;height:46px;border-radius:12px;box-shadow:0 6px 18px rgba(29,28,42,.22);display:block}
+/* the picture fills the box, pinned to its top left; whatever doesn't fit runs off the right */
+.si-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left top;display:block}
 .si-side{display:flex;flex-direction:column;min-width:0;padding:12px 20px 12px 32px}
 .si-top{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-height:46px;font-size:14px;font-weight:600;color:var(--muted)}
-.si-top img{display:none;width:40px;height:40px;border-radius:10px}
 .si-form{margin:auto;width:min(440px,100%);display:flex;flex-direction:column;gap:12px;padding-bottom:46px}
 .si-form h2{font-family:var(--font-display);font-weight:800;font-size:54px;line-height:1.05;letter-spacing:-.02em;margin:0 0 8px}
 .si-copy{margin:0 0 10px;font-size:14.5px;font-weight:500;line-height:1.55;color:var(--ink-soft)}
@@ -528,8 +525,6 @@ button:not(:disabled):not(.tname):not(.cat-name):active,.dep.click:active{transf
   .si-panel{grid-template-columns:minmax(0,1fr);border-radius:20px}
   .si-art{display:none}
   .si-side{padding:8px 12px}
-  .si-top{justify-content:space-between}
-  .si-top img{display:block}
   .si-form h2{font-size:40px}
 }
 </style>
