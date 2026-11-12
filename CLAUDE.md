@@ -40,6 +40,9 @@ whose password is the code. To add someone or replace a lost or leaked link, run
 `select private.add_person('<id>', '<Name>');` and send them the link with the code it returns. `<Name>` must match the name in `TEAM` in `index.html`.
 To remove someone: `update public.people set active = false where id = '<id>';`
 
+The sign-in screen (`gate()` in `db.js`, `.signin` / `.si-*` styles in `index.html`) is a split panel: `public/img/signin.webp` fills the left box pinned to its right edge,
+with `public/img/logo.svg` on top. Both files are public, so anything in that picture can be seen by anyone who opens the site without signing in.
+
 ## Testing
 `npm test` (needs Python Playwright and Chrome) runs the chart against a stand-in database (`test/stub.js`) and checks sign-in,
 loading, saving order, live updates, undo and the read-only path. Run it before every push to `main`.

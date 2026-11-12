@@ -168,14 +168,21 @@
   function gate(message){
     return new Promise(resolve => {
       const el = document.createElement("div");
-      el.className = "scrim"; el.id = "signin"; el.style.cssText = "z-index:200;background:var(--bg)";
-      el.innerHTML = `<form class="modal" style="width:min(440px,100%)">
-        <h2>Sign In To The Launch Plan</h2>
-        <p class="hint" style="font-size:13.5px">Open your personal sign-in link, or paste it here. You only need to do this once on each device.</p>
-        <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
-        <p class="hint" id="signinMsg" style="color:var(--late-ink);min-height:1.5em">${message || ""}</p>
-        <div style="display:flex;justify-content:flex-end"><button class="btn primary" type="submit">Sign In</button></div>
-      </form>`;
+      el.className = "signin"; el.id = "signin";
+      el.innerHTML = `<div class="si-panel">
+        <div class="si-art"><img class="si-shot" src="/img/signin.webp" alt=""><img class="si-logo" src="/img/logo.svg" alt="InnerSteps"></div>
+        <div class="si-side">
+          <div class="si-top"><img src="/img/logo.svg" alt="InnerSteps"><span>InnerSteps Gantt Chart Software</span></div>
+          <form class="si-form">
+            <h2>Sign In</h2>
+            <p class="si-copy">Open your personal sign-in link, or paste it here. You only need to do this once on each device.</p>
+            <input class="in" id="signinKey" placeholder="Paste your sign-in link" autocomplete="off" spellcheck="false" aria-label="Your sign-in link">
+            <button class="btn primary" type="submit">Sign In</button>
+            <p class="si-msg" id="signinMsg" role="status"></p>
+          </form>
+        </div>
+      </div>`;
+      el.querySelector("#signinMsg").textContent = message || "";
       document.body.appendChild(el);
       const input = el.querySelector("#signinKey"), msg = el.querySelector("#signinMsg");
       input.focus();
