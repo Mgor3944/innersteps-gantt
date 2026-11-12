@@ -1483,13 +1483,17 @@ const PALETTE = [
 /* older colours some saved data may still use; not offered as swatches */
 const LEGACY = [{k:"orchid",fill:"#E2A2F5",ink:"#5E1C78"},{k:"plum",fill:"#C69ADB",ink:"#45175C"}];
 const colorOf = k => PALETTE.find(p => p.k === k) || LEGACY.find(p => p.k === k) || PALETTE[0];
-/* the team: who can be assigned to tasks and given time away. ini = initials shown in the circle */
-const TEAM = [
+/* the team: who can be assigned to tasks and given time away. ini = initials shown in the circle.
+   It comes from the database once signed in (setTeam); this list is only the starting point.
+   Removed people stay in TEAM (active:false) so their tasks keep their name, but can't be picked or given time away */
+let TEAM = [
   {name:"Matt", ini:"MG", color:"blue"}, {name:"Jesse", ini:"JW", color:"violet"}, {name:"Jay", ini:"JP", color:"teal"},
   {name:"Anissa", ini:"AM", color:"pink"}, {name:"Anna", ini:"AN", color:"green"}, {name:"Dipesh", ini:"DS", color:"yellow"},
   {name:"Sofia", ini:"SP", color:"slate"}
 ];
-const TEAM_NAMES = TEAM.map(p => p.name);
+let TEAM_NAMES = TEAM.map(p => p.name);
+const activeTeam = () => TEAM.filter(p => p.active !== false);
+function setTeam(list){ if (!list || !list.length) return; TEAM = list; TEAM_NAMES = TEAM.map(p => p.name); }
 const person = n => TEAM.find(p => p.name === n);
 /* bars are coloured by the person doing the task. Reds and oranges are kept for warnings (late, launch, clashes)
    and sand is too close to the grey used for shared tasks, so those aren't offered as people's colours */
@@ -2048,9 +2052,10 @@ function awayHTML(W, trackW, flags){
     </div>
     <div class="track" style="width:${trackW}px"></div></div>`;
   if (collapsed) return h;
-  TEAM.forEach((p, i) => {
+  const AWAY_TEAM = activeTeam();
+  AWAY_TEAM.forEach((p, i) => {
     const mine = all.filter(a => a.person === p.name).sort((a, b) => (effAway(a).start || "").localeCompare(effAway(b).start || ""));
-    h += `<div class="row task awayrow ${i === TEAM.length - 1 ? "last" : ""}" data-person="${p.name}">
+    h += `<div class="row task awayrow ${i === AWAY_TEAM.length - 1 ? "last" : ""}" data-person="${p.name}">
       <div class="label"><button class="pbtn" data-act="open-person" data-p="${p.name}" title="See ${esc(p.name)}'s time away">${avatar(p.name)}<span class="pname">${esc(p.name)}</span></button>${(() => {
         const hits = byPerson.get(p.name).sort((x, y) => x.c.from.localeCompare(y.c.from));
         if (!hits.length) return "";
@@ -2166,7 +2171,7 @@ function renderDrawer(flags){
         <div class="delaybtns"><button data-act="delay" data-n="1">+1 Day</button><button data-act="delay" data-n="3">+3 Days</button><button data-act="delay" data-n="7">+1 Week</button><button data-act="delay" data-n="14">+2 Weeks</button></div>
         <p class="hint">Each click adds to the delay. Everything that waits on this task moves with it.</p></div>` : ""}
       <div class="field real-only"><span class="flabel">Assigned To</span>
-        <div class="chips">${TEAM.map(p => { const on = owners.includes(p.name), pc = personColor(p.name); return `<button class="tagopt person ${on ? "on" : ""}" data-act="toggle-owner" data-p="${p.name}" aria-pressed="${on}" ${on ? `style="background:${pc.fill};color:${pc.ink}"` : ""}><span class="ms">${on ? "check" : "add"}</span>${p.name}</button>`; }).join("")}</div>
+        <div class="chips">${TEAM.filter(p => p.active !== false || owners.includes(p.name)).map(p => { const on = owners.includes(p.name), pc = personColor(p.name); return `<button class="tagopt person ${on ? "on" : ""}" data-act="toggle-owner" data-p="${p.name}" aria-pressed="${on}" ${on ? `style="background:${pc.fill};color:${pc.ink}"` : ""}><span class="ms">${on ? "check" : "add"}</span>${p.name}</button>`; }).join("")}</div>
       </div>
       ${subsOf(c).length ? `<div class="field real-only"><label class="flabel" for="fSub">Sub-Category</label><select id="fSub" class="in"><option value="">None</option>${subsOf(c).map(x => `<option value="${esc(x.id)}" ${t.sub === x.id ? "selected" : ""}>${esc(titleCase(x.name))}</option>`).join("")}</select></div>` : ""}
       <div class="field"><span class="flabel">Starts After</span>
@@ -2908,6 +2913,8 @@ document.addEventListener("click", ev => { if (suppressClick){ suppressClick = f
   try { db = window.GanttDB ? await window.GanttDB.connect() : null; } catch(e){ db = null; }
   if (!db){ S.dbFailed = true; render(); return; }
   S.db = db;
+  setTeam(window.GanttDB.team && window.GanttDB.team());
+  window.addEventListener("gantt:team", () => { setTeam(window.GanttDB.team()); render(); });
   const fail = err => { if (err && err.code === "revoked"){ S.canWrite = false; document.body.classList.add("readonly"); } else toast("Lost the live connection. Reload the page to reconnect."); };
   db.collection("categories").onSnapshot(snap => { S.cats = new Map(snap.docs.map(d => [d.id, {id:d.id, ...d.data()}])); S.loaded.c = true; render(); }, fail);
   db.collection("tasks").onSnapshot(snap => {

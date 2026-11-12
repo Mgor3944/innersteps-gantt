@@ -38,11 +38,24 @@ with sync_playwright() as p:
     check("signed-in name in menu", "Signed in as Jesse" in pg.inner_html("#morewrap .menu"))
     # 2b. Team Access: remove asks to confirm, then calls the database; you can't remove yourself
     pg.click('#morewrap > .btn'); pg.click('text=Team Access'); pg.wait_for_selector('.ta-list .btn')
-    check("team list shows others with Remove, not yourself", pg.locator('.ta-list .btn').count()==1 and "(You)" in pg.inner_text('.ta-list'))
-    pg.click('.ta-list .btn'); check("remove asks to confirm first", pg.evaluate("window.__rpc.length")==0 and "Remove Anna?" in pg.inner_text('.ta-list .btn'))
-    pg.click('.ta-list .btn'); pg.wait_for_timeout(200)
+    check("team list: New Link for all, Remove for others only", pg.locator('.ta-list .btn:text("New Link")').count()==3 and pg.locator('.ta-list .btn:text("Remove")').count()==2 and "(You)" in pg.inner_text('.ta-list'))
+    check("chart team comes from the database", pg.evaluate("TEAM.map(p=>p.name).join(',')")=="Jesse,Anna,Dipesh", pg.evaluate("TEAM.map(p=>p.name).join(',')"))
+    nl='.ta-list > div:nth-child(2) .btn:has-text("Link")'
+    pg.click(nl); check("new link asks to confirm first", pg.evaluate("window.__rpc.length")==0 and "Replace Their Link?" in pg.inner_text(nl))
+    pg.click(nl); pg.wait_for_selector('.ta-link input')
+    check("new link shown with copy", pg.input_value('.ta-link input').endswith("/#k=anna."+"n"*32) and pg.evaluate("window.__rpc[0][0]")=="admin_new_link", pg.input_value('.ta-link input'))
+    pg.fill('.ta-add [name=name]', 'Milo'); check("initials fill in from the name", pg.input_value('.ta-add [name=ini]')=="MI")
+    pg.click('.ta-add [type=submit]'); pg.wait_for_selector('.ta-newlink .ta-link input')
+    check("new member gets a link", pg.input_value('.ta-newlink input').endswith("/#k=milo."+"c"*32))
+    pg.wait_for_timeout(200)
+    check("new member joins the chart's team", "Milo" in pg.evaluate("TEAM.map(p=>p.name)") and pg.locator('.awayrow[data-person="Milo"]').count()==1)
+    pg.evaluate("window.__rpc.length=0")
+    rm='.ta-list > div:nth-child(2) .btn.danger'
+    pg.click(rm); check("remove asks to confirm first", pg.evaluate("window.__rpc.length")==0 and "Remove Anna?" in pg.inner_text(rm))
+    pg.click(rm); pg.wait_for_timeout(300)
     check("confirmed remove calls the database", pg.evaluate("JSON.stringify(window.__rpc)")=='[["set_member_active",{"p_id":"anna","p_active":false}]]')
     check("removed person can be given access back", "Give Access Back" in pg.inner_text('.ta-list'))
+    check("removed person has no Team Away row but keeps their name on tasks", pg.locator('.awayrow[data-person="Anna"]').count()==0 and "Anna" in pg.evaluate("TEAM_NAMES"))
     pg.keyboard.press("Escape"); check("Escape closes Team Access", pg.locator('.ta-list').count()==0)
     # 3. a status click saves once, to the right document, and survives its own echo
     pg.click('.row.task[data-task="t1"] .status'); pg.wait_for_timeout(300)

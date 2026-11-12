@@ -37,9 +37,15 @@ so the screen never falls back to an older value. If a save fails it re-reads wh
 No passwords to remember. Each person has a personal link, `https://gantt.innersteps.org/#k=<id>.<code>`.
 Opening it once signs that browser in and it stays signed in. Behind it is a Supabase Auth user `<id>@gantt.innersteps.org`
 whose password is the code. To add someone or replace a lost or leaked link, run in the SQL editor of the Gantt project:
-`select private.add_person('<id>', '<Name>');` and send them the link with the code it returns. `<Name>` must match the name in `TEAM` in `index.html`.
-Jesse and Matt (`people.admin`) can remove someone, or give them access back, from **Team Access** in the chart's menu
-(`public.set_member_active(id, active)`, which checks the caller is an admin, refuses to remove yourself and signs the removed person out).
+`select private.add_person('<id>', '<Name>');` and send them the link with the code it returns. Jesse and Matt (`people.admin`) manage this from **Team Access** in the chart's menu, so the SQL above is only a fallback:
+- New Link (`public.admin_new_link(id)`): replaces someone's link and signs them out; making your own signs you straight back in.
+- Remove / Give Access Back (`public.set_member_active(id, active)`): refuses to remove yourself and signs the removed person out.
+- Add A Team Member (`public.admin_add_person(name, initials)`): makes their id from the name, picks the first colour nobody uses, returns their link.
+A link is shown once, with a Copy button; codes are only stored hashed. All three functions check the caller is an admin.
+
+The chart's team (name, initials, colour, order) comes from `public.people` (`loadTeam()` in `db.js`, `setTeam()` in `index.html`;
+the `TEAM` list in the page is only a fallback). Removed people stay in `TEAM` with `active:false` so their tasks keep their name,
+but they get no Team Away row and can't be picked for new tasks. A colour changed in a person's panel is saved in `settings/plan.personColors`, which wins over `people.color`.
 
 The sign-in screen (`gate()` in `db.js`, `.signin` / `.si-*` styles in `index.html`): the sign-in box centred above `public/img/illustration.svg`,
 whose characters' hands rest on a black bar along the bottom (`--ih`, `--bar` on `.signin`).

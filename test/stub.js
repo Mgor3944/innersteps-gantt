@@ -12,7 +12,7 @@
     {collection:"notes", id:"summary", data:{text:"Hello", updated:1}},
     {collection:"changelog", id:"log28", data:{at:1, date:today, text:"x"}}
   ];
-  window.__team = [{id:"anna",name:"Anna",active:true,admin:false},{id:"jesse",name:"Jesse",active:true,admin:true}]; window.__rpc = [];
+  window.__team = [{id:"jesse",name:"Jesse",ini:"JW",color:"violet",active:true,admin:true,sort:1},{id:"anna",name:"Anna",ini:"AN",color:"green",active:true,admin:false,sort:2},{id:"dipesh",name:"Dipesh",ini:"DS",color:"yellow",active:true,admin:false,sort:3}]; window.__rpc = [];
   window.__rows = rows; window.__writes = []; window.__session = null; window.__member = true; window.__delay = 30;
   const wait = v => new Promise(r => setTimeout(() => r(v), window.__delay));
   function from(table){
@@ -41,7 +41,13 @@
       onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; }
     },
     from,
-    async rpc(fn, args){ window.__rpc.push([fn, args]); const p = window.__team.find(x => x.id === args.p_id); if (p) p.active = args.p_active; return {error:null}; },
+    async rpc(fn, args){
+      window.__rpc.push([fn, args]);
+      if (fn === "set_member_active"){ const p = window.__team.find(x => x.id === args.p_id); if (p) p.active = args.p_active; return {error:null}; }
+      if (fn === "admin_new_link") return {data:"n".repeat(32), error:null};
+      if (fn === "admin_add_person"){ const id = args.p_name.toLowerCase(); window.__team.push({id, name:args.p_name, ini:args.p_ini, color:"indigo", active:true, admin:false, sort:9}); return {data:{id, code:"c".repeat(32)}, error:null}; }
+      return {error:{message:"unknown"}};
+    },
     channel(){ const c = { on(_t, _f, cb){ window.__emit = cb; return c; }, subscribe(cb){ setTimeout(() => cb("SUBSCRIBED"), 10); return c; } }; return c; }
   }) };
 })();

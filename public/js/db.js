@@ -21,7 +21,7 @@
   const split = path => { const i = path.indexOf("/"); return [path.slice(0, i), path.slice(i + 1)]; };
   const ls = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }, del(k){ try { localStorage.removeItem(k); } catch(e){} } };
 
-  let sb = null, me = null;
+  let sb = null, me = null, team = [];
   const cache = new Map();          /* collection -> Map(id -> data) */
   const colSubs = new Map();        /* collection -> Set(callback) */
   const docSubs = new Map();        /* "collection/id" -> Set(callback) */
@@ -210,51 +210,121 @@
     } else menu.append(sep, who, out);
   }
 
-  /* Team Access (Jesse and Matt only): remove someone, or give them back access. The database checks who is asking. */
+  /* the team as the chart uses it: everyone, removed people included so their old tasks keep their name */
+  async function loadTeam(){
+    const { data, error } = await sb.from("people").select("id,name,ini,color,active,sort").order("sort", { nullsFirst: false });
+    if (error || !data) return false;
+    team = data.map(p => ({ id: p.id, name: p.name, ini: p.ini || p.name.slice(0, 2).toUpperCase(), color: p.color || "slate", active: p.active }));
+    return true;
+  }
+  async function teamChanged(){ if (await loadTeam()) window.dispatchEvent(new CustomEvent("gantt:team")); }
+
+  /* Team Access (Jesse and Matt only): new sign-in links, removing people or giving them access back, and adding people.
+     The database checks who is asking. */
   async function teamAccess(){
     const wrap = document.createElement("div");
     wrap.className = "scrim"; wrap.style.zIndex = "60";
-    wrap.innerHTML = `<div class="modal" role="dialog" aria-label="Team Access" style="width:min(440px,100%)">
+    wrap.innerHTML = `<div class="modal" role="dialog" aria-label="Team Access" style="width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto">
       <h2>Team Access</h2>
-      <p class="hint">Removing someone signs them out straight away. Their tasks stay on the plan, and you can give them access again any time.</p>
+      <p class="hint">A new link replaces the old one, which stops working straight away. Removing someone signs them out, but their tasks stay on the plan and you can give them access back any time.</p>
       <div class="ta-list" style="display:flex;flex-direction:column;gap:6px"><p class="hint">Loading…</p></div>
       <p class="hint ta-msg" style="color:var(--late-ink);min-height:1.2em;margin:0"></p>
-      <div style="display:flex;justify-content:flex-end"><button class="btn" data-close>Done</button></div>
+      <form class="ta-add" style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px">
+        <span class="flabel">Add A Team Member</span>
+        <div style="display:flex;gap:6px">
+          <input class="in" name="name" placeholder="First name" maxlength="40" autocomplete="off" aria-label="First name" style="flex:1">
+          <input class="in" name="ini" placeholder="Initials" maxlength="2" autocomplete="off" aria-label="Initials" style="width:84px;text-transform:uppercase">
+          <button class="btn primary" type="submit" style="height:38px">Add</button>
+        </div>
+        <div class="ta-newlink"></div>
+      </form>
+      <div style="display:flex;justify-content:flex-end"><button class="btn" type="button" data-close>Done</button></div>
     </div>`;
     document.body.appendChild(wrap);
     const close = () => { wrap.remove(); document.removeEventListener("keydown", esc); };
     const esc = ev => { if (ev.key === "Escape") close(); };
     document.addEventListener("keydown", esc);
     wrap.addEventListener("click", ev => { if (ev.target === wrap || ev.target.closest("[data-close]")) close(); });
-    const list = wrap.querySelector(".ta-list"), msg = wrap.querySelector(".ta-msg");
+    const list = wrap.querySelector(".ta-list"), msg = wrap.querySelector(".ta-msg"), form = wrap.querySelector(".ta-add");
+    const linkFor = (id, code) => location.origin + "/#k=" + id + "." + code;
+    /* a link box with a Copy button, shown once; the code isn't stored anywhere it can be read back */
+    function linkBox(label, link){
+      const box = document.createElement("div");
+      box.className = "ta-link";
+      box.style.cssText = "display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;background:var(--accent-soft)";
+      box.innerHTML = `<span style="font-size:12.5px;font-weight:600;color:var(--accent)"></span>
+        <div style="display:flex;gap:6px"><input class="in" readonly style="flex:1;height:34px;font-size:12.5px;background:var(--surface)"><button class="btn primary" type="button" style="height:34px">Copy</button></div>`;
+      box.querySelector("span").textContent = label;
+      const input = box.querySelector("input"), copy = box.querySelector("button");
+      input.value = link;
+      input.addEventListener("focus", () => input.select());
+      copy.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(link); } catch(e){ input.select(); document.execCommand && document.execCommand("copy"); }
+        copy.textContent = "Copied";
+        setTimeout(() => { copy.textContent = "Copy"; }, 1600);
+      });
+      return box;
+    }
+    const smallBtn = (text, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn" + (cls ? " " + cls : ""); b.style.height = "32px"; b.textContent = text; return b; };
     async function load(){
-      const { data, error } = await sb.from("people").select("id,name,active,admin").order("name");
+      const { data, error } = await sb.from("people").select("id,name,active").order("sort", { nullsFirst: false });
       if (error){ list.innerHTML = `<p class="hint">Couldn't load the team. Check your connection and try again.</p>`; return; }
       list.innerHTML = "";
       for (const p of data){
+        const item = document.createElement("div");
+        item.style.cssText = "display:flex;flex-direction:column;gap:6px";
         const row = document.createElement("div");
-        row.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)";
+        row.style.cssText = "display:flex;align-items:center;gap:6px;padding:6px 8px 6px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)";
         const name = document.createElement("span");
-        name.style.cssText = "flex:1;font-weight:600;" + (p.active ? "" : "color:var(--muted);text-decoration:line-through");
+        name.style.cssText = "flex:1;min-width:0;font-weight:600;" + (p.active ? "" : "color:var(--muted);text-decoration:line-through");
         name.textContent = p.name + (p.id === me.id ? " (You)" : "");
         row.append(name);
+        if (p.active){
+          const nl = smallBtn("New Link");
+          nl.addEventListener("click", async () => {
+            if (!nl.classList.contains("confirm")){ nl.classList.add("confirm"); nl.style.background = "var(--accent)"; nl.style.color = "var(--accent-ink)"; nl.textContent = "Replace Their Link?"; return; }
+            nl.disabled = true; msg.textContent = "";
+            const { data: code, error: e } = await sb.rpc("admin_new_link", { p_id: p.id });
+            if (e || !code){ msg.textContent = "Couldn't make a new link. " + ((e && e.message) || ""); nl.disabled = false; return; }
+            /* your own old sign-in was just ended too, so sign straight back in with the new link */
+            if (p.id === me.id) await signInWithKey({ id: p.id, code });
+            item.querySelectorAll(".ta-link").forEach(x => x.remove());
+            item.append(linkBox((p.id === me.id ? "Your" : p.name + "'s") + " new link. Copy it now: it won't be shown again.", linkFor(p.id, code)));
+            nl.classList.remove("confirm"); nl.style.background = ""; nl.style.color = ""; nl.textContent = "New Link"; nl.disabled = false;
+          });
+          row.append(nl);
+        }
         if (p.id !== me.id){
-          const b = document.createElement("button");
-          b.className = "btn" + (p.active ? " danger" : "");
-          b.style.height = "32px";
-          b.textContent = p.active ? "Remove" : "Give Access Back";
+          const b = smallBtn(p.active ? "Remove" : "Give Access Back", p.active ? "danger" : "");
           b.addEventListener("click", async () => {
             if (p.active && !b.classList.contains("confirm")){ b.classList.add("confirm"); b.textContent = "Remove " + p.name + "?"; return; }
             b.disabled = true; msg.textContent = "";
             const { error: e } = await sb.rpc("set_member_active", { p_id: p.id, p_active: !p.active });
             if (e){ msg.textContent = "Couldn't change that. " + (e.message || ""); b.disabled = false; return; }
-            load();
+            load(); teamChanged();
           });
           row.append(b);
         }
-        list.append(row);
+        item.prepend(row);
+        list.append(item);
       }
     }
+    const nameIn = form.querySelector("[name=name]"), iniIn = form.querySelector("[name=ini]");
+    let iniTouched = false;
+    iniIn.addEventListener("input", () => { iniTouched = true; });
+    nameIn.addEventListener("input", () => { if (!iniTouched) iniIn.value = nameIn.value.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase(); });
+    form.addEventListener("submit", async ev => {
+      ev.preventDefault();
+      const nm = nameIn.value.trim(), out = form.querySelector(".ta-newlink");
+      if (!nm){ nameIn.focus(); return; }
+      const add = form.querySelector("[type=submit]"); add.disabled = true; msg.textContent = ""; out.innerHTML = "";
+      const { data: r, error: e } = await sb.rpc("admin_add_person", { p_name: nm, p_ini: iniIn.value });
+      add.disabled = false;
+      if (e || !r){ msg.textContent = "Couldn't add them. " + ((e && e.message) || ""); return; }
+      out.append(linkBox(nm + " is on the team. Send them this link: it won't be shown again.", linkFor(r.id, r.code)));
+      nameIn.value = ""; iniIn.value = ""; iniTouched = false;
+      load(); teamChanged();
+    });
     load();
   }
 
@@ -276,6 +346,7 @@
       await gate(message); message = "This sign-in link no longer has access. Ask Jesse or Matt for a new one.";
     }
     try { await loadAll(); } catch(e){ return null; }
+    await loadTeam();
     ready = true;
     goLive();
     sb.auth.onAuthStateChange(ev => { if (ev === "SIGNED_OUT") fail({ code: "revoked" }); });
@@ -283,5 +354,5 @@
     return db;
   }
 
-  window.GanttDB = { connect, me: () => me };
+  window.GanttDB = { connect, me: () => me, team: () => team };
 })();
