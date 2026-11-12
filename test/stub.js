@@ -45,7 +45,13 @@
       window.__rpc.push([fn, args]);
       if (fn === "set_member_active"){ const p = window.__team.find(x => x.id === args.p_id); if (p) p.active = args.p_active; return {error:null}; }
       if (fn === "admin_new_link") return {data:"n".repeat(32), error:null};
-      if (fn === "admin_add_person"){ const id = args.p_name.toLowerCase(); window.__team.push({id, name:args.p_name, ini:args.p_ini, color:"indigo", active:true, admin:false, sort:9}); return {data:{id, code:"c".repeat(32)}, error:null}; }
+      if (fn === "admin_add_person"){
+        const old = window.__team.find(x => x.name.toLowerCase() === args.p_name.toLowerCase());
+        if (old && old.active) return {error:{message:old.name + " is already on the team"}};
+        if (old){ old.active = true; old.admin = args.p_admin; return {data:{id:old.id, code:"r".repeat(32), restored:true}, error:null}; }
+        const id = args.p_name.toLowerCase(); window.__team.push({id, name:args.p_name, ini:args.p_ini, color:"indigo", active:true, admin:args.p_admin, sort:9});
+        return {data:{id, code:"c".repeat(32), restored:false}, error:null};
+      }
       return {error:{message:"unknown"}};
     },
     channel(){ const c = { on(_t, _f, cb){ window.__emit = cb; return c; }, subscribe(cb){ setTimeout(() => cb("SUBSCRIBED"), 10); return c; } }; return c; }

@@ -453,6 +453,11 @@ body.narrow{--label-w:170px}
 .bar.draft{background:var(--accent-soft);outline:2px dashed var(--accent);outline-offset:-2px;color:var(--accent);pointer-events:none;z-index:4;cursor:copy}
 .track.placeable,.track.awayplace{cursor:crosshair}
 .dep.click:hover{border-color:var(--accent)}
+.linkbox{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:14px;background:var(--accent-soft)}
+.linkbox>span{font-size:12.5px;font-weight:600;color:var(--accent);line-height:1.45}
+.linkbox>div{display:flex;gap:6px}
+.linkbox .in{flex:1;height:34px;font-size:12.5px;background:var(--surface)}
+.linkbox .btn{height:34px}
 .dep .dd{color:var(--away-ink);font-weight:700;font-size:11.5px;flex:none}
 @media (max-width:700px){:root{--label-w:180px}.task .label{padding-left:12px}.label .avatar{display:none}}
 
@@ -2023,7 +2028,7 @@ function awayMiniHTML(W, trackW){
       bars += `<span class="ambar" style="left:${idx(e.start)*W+2}px;width:${Math.max(3, days*W-4)}px;top:${6 + i*13}px;--lf:${pc.fill};--li:${pc.ink}" title="${esc(`${l.p.name} away · ${nice(e.start)} to ${nice(e.end)} (${plural(days, "day")})${a.note ? " · " + a.note : ""}`)}"></span>`;
     }
   });
-  return `<div class="awaymini" id="awaymini"><div class="aminner"><div class="label"><button class="amlist" data-act="away-top" tabindex="-1" title="Back up to Team Away">${names}</button></div><div class="track" style="width:${trackW}px;height:${lanes.length*13 + 9}px">${ti >= 0 && ti < S.days ? `<span class="amtoday" style="left:${ti*W + W/2 - 1}px"></span>` : ""}${bars}</div></div></div>`;
+  return `<div class="awaymini" id="awaymini"><div class="aminner"><div class="label"><button class="amlist" data-act="away-top" tabindex="-1" title="Back up to Team">${names}</button></div><div class="track" style="width:${trackW}px;height:${lanes.length*13 + 9}px">${ti >= 0 && ti < S.days ? `<span class="amtoday" style="left:${ti*W + W/2 - 1}px"></span>` : ""}${bars}</div></div></div>`;
 }
 /* show the mini strip only once the full Team Away rows have scrolled up behind the date header */
 function updateAwayMini(instant){
@@ -2045,17 +2050,17 @@ function awayHTML(W, trackW, flags){
   const total = new Set([...flags.clash.keys()]).size;
   let h = `<div class="row cat awayrow ${collapsed ? "collapsed" : ""}" data-cat="__away">
     <div class="label">
-      <button class="icon-btn tog" data-act="toggle" aria-label="${collapsed ? "Expand" : "Collapse"} Team Away" aria-expanded="${!collapsed}"><span class="ms">expand_more</span></button>
-      <button class="cat-name" data-act="toggle">Team Away</button>
+      <button class="icon-btn tog" data-act="toggle" aria-label="${collapsed ? "Expand" : "Collapse"} Team" aria-expanded="${!collapsed}"><span class="ms">expand_more</span></button>
+      <button class="cat-name" data-act="toggle">Team</button>
       ${collapsed && total ? `<button class="clashpill" data-act="toggle" title="Expand to see who"><span class="ms">person_off</span>${plural(total, "Clash", "Clashes")}</button>` : ""}
       <span class="count" title="${plural(all.length, "time away entry")}">${all.length}</span>
     </div>
     <div class="track" style="width:${trackW}px"></div></div>`;
   if (collapsed) return h;
-  const AWAY_TEAM = activeTeam();
+  const AWAY_TEAM = activeTeam(), canAdd = isAdmin() && !S.test;
   AWAY_TEAM.forEach((p, i) => {
     const mine = all.filter(a => a.person === p.name).sort((a, b) => (effAway(a).start || "").localeCompare(effAway(b).start || ""));
-    h += `<div class="row task awayrow ${i === AWAY_TEAM.length - 1 ? "last" : ""}" data-person="${p.name}">
+    h += `<div class="row task awayrow ${i === AWAY_TEAM.length - 1 && !canAdd ? "last" : ""}" data-person="${p.name}">
       <div class="label"><button class="pbtn" data-act="open-person" data-p="${p.name}" title="See ${esc(p.name)}'s time away">${avatar(p.name)}<span class="pname">${esc(p.name)}</span></button>${(() => {
         const hits = byPerson.get(p.name).sort((x, y) => x.c.from.localeCompare(y.c.from));
         if (!hits.length) return "";
@@ -2076,7 +2081,71 @@ function awayHTML(W, trackW, flags){
     }
     h += `</div></div>`;
   });
+  if (canAdd) h += `<div class="row task addrow awayrow last" data-cat="__away"><div class="label"><button class="status" data-act="add-member" aria-label="Add a team member"><span class="ms">add</span></button><button class="tname" data-act="add-member">Add Member</button></div><div class="track" style="width:${trackW}px"></div></div>`;
   return h;
+}
+/* ---------- team members: Jesse and Matt (admins) can add people, remove them and make new sign-in links ---------- */
+const isAdmin = () => !!(window.GanttDB && window.GanttDB.isAdmin && window.GanttDB.isAdmin());
+/* a link that's only ever shown once, with a Copy button */
+function linkBoxHTML(label, link){
+  return `<div class="linkbox"><span>${esc(label)}</span><div><input class="in" readonly value="${esc(link)}" aria-label="Sign-in link"><button class="btn primary" type="button" data-act="copy-link">Copy</button></div></div>`;
+}
+async function copyLink(btn){
+  const input = btn.parentElement.querySelector("input");
+  try { await navigator.clipboard.writeText(input.value); } catch(e){ input.select(); try { document.execCommand("copy"); } catch(_){} }
+  btn.textContent = "Copied"; setTimeout(() => { if (btn.isConnected) btn.textContent = "Copy"; }, 1600);
+}
+async function memberNewLink(btn){
+  const p = person(S.openPerson); if (!p || !p.id) return;
+  btn.disabled = true;
+  try { S.memberLink = {name:p.name, link:await window.GanttDB.admin.newLink(p.id)}; renderDrawer(); }
+  catch(e){ toast("Couldn't make a new link. " + e.message); btn.disabled = false; }
+}
+async function memberRemove(btn){
+  const p = person(S.openPerson); if (!p || !p.id) return;
+  btn.disabled = true;
+  try { await window.GanttDB.admin.remove(p.id); closeDrawer(); toast(`${p.name} has been removed. Their tasks stay on the plan.`); }
+  catch(e){ toast("Couldn't remove them. " + e.message); btn.disabled = false; }
+}
+function openMemberModal(){
+  if (!isAdmin() || S.test) return;
+  const m = $("modal");
+  let role = "member", iniTouched = false;
+  m.innerHTML = `<div class="scrim" data-act="modal-bg"><form class="modal" id="memberForm" style="width:min(420px,100%)">
+    <h2>Add Member</h2>
+    <div class="field"><label for="mName">Name</label><input id="mName" class="in" placeholder="e.g. Milo" maxlength="40" autocomplete="off" required></div>
+    <div class="field"><label for="mIni">Initials</label><input id="mIni" class="in" placeholder="e.g. MI" maxlength="2" autocomplete="off" style="text-transform:uppercase"></div>
+    <div class="field"><span class="flabel">Role</span>
+      <div class="statusseg" style="grid-template-columns:1fr 1fr" role="radiogroup" aria-label="Role">
+        <button type="button" data-role="member" class="on" role="radio" aria-checked="true">Member</button>
+        <button type="button" data-role="admin" role="radio" aria-checked="false">Admin</button>
+      </div>
+      <p class="hint" id="mRoleHint">Can see and edit the whole plan.</p>
+    </div>
+    <p class="hint" id="mMsg" style="color:var(--late-ink);min-height:1.2em;margin:0"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="modal-close">Cancel</button><button class="btn primary" type="submit">Add Member</button></div>
+  </form></div>`;
+  const name = $("mName"), ini = $("mIni"), msg = $("mMsg");
+  name.addEventListener("input", () => { if (!iniTouched) ini.value = name.value.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase(); });
+  ini.addEventListener("input", () => { iniTouched = true; });
+  m.querySelectorAll("[data-role]").forEach(b => b.addEventListener("click", () => {
+    role = b.dataset.role;
+    m.querySelectorAll("[data-role]").forEach(x => { const on = x.dataset.role === role; x.classList.toggle("on", on); x.setAttribute("aria-checked", on); });
+    $("mRoleHint").textContent = role === "admin" ? "Can also add and remove members and make sign-in links." : "Can see and edit the whole plan.";
+  }));
+  $("memberForm").onsubmit = async ev => {
+    ev.preventDefault();
+    const nm = titleCase(name.value.trim()); if (!nm) return;
+    const btn = $("memberForm").querySelector("[type=submit]"); btn.disabled = true; msg.textContent = "";
+    try {
+      const r = await window.GanttDB.admin.add(nm, ini.value, role === "admin");
+      $("memberForm").innerHTML = `<h2>${r.restored ? `${esc(nm)} Is Back` : `${esc(nm)} Is On The Team`}</h2>
+        <p class="hint">${r.restored ? "They had been removed. Their tasks and colour are just as they were." : "They can now be given tasks and time away."} Send them this link to sign in. It's only shown once.</p>
+        ${linkBoxHTML("Sign-in link for " + nm, r.link)}
+        <div style="display:flex;justify-content:flex-end"><button type="button" class="btn primary" data-act="modal-close">Done</button></div>`;
+    } catch(e){ msg.textContent = e.message; btn.disabled = false; }
+  };
+  name.focus();
 }
 /* in categories set to "colour bars by tag", a bar takes the colour of its first tag */
 function barColor(t){ const o = ownersOf(t); return o.length === 1 ? personColor(o[0]) : SHARED; }
@@ -2104,7 +2173,7 @@ function scrollToTask(id){
 
 /* ---------- drawer ---------- */
 function openDrawer(id, focusName){ if (S.notesOpen){ S.notesOpen = false; $("notes").classList.remove("open"); } S.openAway = null; S.openPerson = null; S.openId = id; render(); $("drawer").classList.add("open"); if (focusName){ const el = $("fName"); if (el){ el.focus(); el.select(); } } }
-function closeDrawer(){ const a = document.activeElement; if (a && a.blur) a.blur(); S.openId = null; S.selId = null; S.selAway = null; S.selPerson = null; S.openAway = null; S.openPerson = null; $("drawer").classList.remove("open"); render(); }
+function closeDrawer(){ S.memberLink = null; const a = document.activeElement; if (a && a.blur) a.blur(); S.openId = null; S.selId = null; S.selAway = null; S.selPerson = null; S.openAway = null; S.openPerson = null; $("drawer").classList.remove("open"); render(); }
 function openAway(id){ const a = S.away.get(id); if (!a) return; openPerson(a.person, id); }
 
 function renderDrawer(flags){
@@ -2222,6 +2291,8 @@ function renderPersonDrawer(flags){
   const testing = !!S.test;
   const mine = [...S.away.values()].filter(a => a.person === name).map(a => ({a, e:effAway(a)})).filter(x => x.e.start && x.e.end).sort((x, y) => x.e.start.localeCompare(y.e.start));
   const hits = personClashes(name, flags);
+  const me = window.GanttDB && window.GanttDB.me && window.GanttDB.me() && window.GanttDB.me().name === name;
+  if (S.memberLink && S.memberLink.name !== name) S.memberLink = null;
   const item = ({a, e}) => {
     const open = S.openAway === a.id, days = diff(e.start, e.end) + 1;
     const n = [...flags.clash.values()].filter(cs => cs.some(c => c.leave.id === a.id)).length;
@@ -2242,7 +2313,7 @@ function renderPersonDrawer(flags){
   dr.dataset.tid = "person:" + name;
   const html = `
     <div class="dhead">
-      <span class="catchip" style="background:var(--hover);color:var(--ink-soft)">Team Away</span>
+      <span class="catchip" style="background:var(--hover);color:var(--ink-soft)">Team</span>
       <div class="spacer"></div>
       <button class="icon-btn" data-act="close" aria-label="Close"><span class="ms">close</span></button>
     </div>
@@ -2261,7 +2332,12 @@ function renderPersonDrawer(flags){
         <div class="chips">${hits.length ? hits.map(({t, c}) => `<span class="dep click" data-act="goto-task" data-id="${t.id}" role="button" tabindex="0"><i class="cd" style="background:${barColor(t).fill}"></i><span class="t">${esc(titleCase(t.name))}</span><span class="dd">${range(c.from, c.to)}</span></span>`).join("") : `<span class="hint">No clashes.</span>`}</div>
         ${hits.length ? `<div><button class="btn" data-act="show-clashes" data-p="${name}"><span class="ms">center_focus_strong</span>Show Clashes On The Chart</button></div>` : ""}
       </div>
-    </div>`;
+      ${S.memberLink && S.memberLink.name === name ? linkBoxHTML((me ? "Your" : name + "'s") + " new sign-in link. The old one has stopped working, and this is only shown once.", S.memberLink.link) : ""}
+    </div>
+    ${isAdmin() && !testing && person(name) && person(name).active !== false ? `<div class="dfoot" style="justify-content:flex-start;gap:8px">
+      ${me ? "" : `<button class="btn danger" data-act="remove-member">Remove Member</button>`}
+      <button class="btn" data-act="new-link">New Sign In Link</button>
+    </div>` : ""}`;
   dr.classList.add("open");
   if (!setHTML(dr, html)) return;
   const id = S.openAway; if (!id || !$("aStart")) return;
@@ -2600,6 +2676,10 @@ document.addEventListener("click", ev => {
     case "test-reset": S.test.hist.push(testSnap()); S.test.changes = new Map(); S.test.away = new Map(); render(); break;
     case "test-apply": { const ch = diffMap(), ac = awayDiff(); const n = ch.size + ac.size; act(`Apply ${plural(n, "change")} from test mode`, () => { for (const [k, c] of ch) patchTask(k, {start:c.to.start, end:c.to.end}); for (const [k, c] of ac) patchAway(k, {start:c.to.start, end:c.to.end}); }); S.test = null; render(); toast(`Applied ${plural(n, "change")} to the real plan.`, true); break; }
     case "add-cat": if (S.canWrite && !S.test) openCatModal(null); break;
+    case "add-member": openMemberModal(); break;
+    case "copy-link": copyLink(a); break;
+    case "new-link": armDelete(a, "Replace The Link?", () => memberNewLink(a)); break;
+    case "remove-member": armDelete(a, `Remove ${esc(S.openPerson)}?`, () => memberRemove(a)); break;
     case "edit-cat": openCatModal(cid); break;
     case "del-cat": { const n = tasksOf(cid).length; armDelete(a, n ? `Delete ${n} Task${n === 1 ? "" : "s"}?` : "Delete?", () => { const name = S.cats.get(cid).name; act(`Delete “${name}”`, () => { for (const t of tasksOf(cid)) removeTask(t.id); put("cat", cid, null); }); toast(`Deleted “${name}” and ${plural(n, "task")}.`, true); }); break; }
     case "toggle": S.collapsed.has(cid) ? S.collapsed.delete(cid) : S.collapsed.add(cid); store.set("collapsed", [...S.collapsed]); render(); break;

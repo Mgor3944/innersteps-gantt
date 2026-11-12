@@ -23,7 +23,7 @@ It began as a Claude artifact; this repo is now the source of truth.
 
 ## Data model
 One table, `public.docs (collection, id, data jsonb)`, a row per document. Collections: `categories`, `tasks`,
-`away`, `changelog`, `notes` (`summary`), `settings` (`plan`). The shape of each document is whatever the chart writes.
+`away` (shown as the **Team** category), `changelog`, `notes` (`summary`), `settings` (`plan`). The shape of each document is whatever the chart writes.
 - `updated_by` / `updated_at` are stamped by a trigger from the signed-in person.
 - `public.changes` records every insert, update and delete with who made it and the before/after. The page never writes it.
 - `public.people` is the team: only people listed there (and `active`) can read or write anything. Row Level Security enforces this.
@@ -39,11 +39,15 @@ so the screen never falls back to an older value. If a save fails it re-reads wh
 No passwords to remember. Each person has a personal link, `https://gantt.innersteps.org/#k=<id>.<code>`.
 Opening it once signs that browser in and it stays signed in. Behind it is a Supabase Auth user `<id>@gantt.innersteps.org`
 whose password is the code. To add someone or replace a lost or leaked link, run in the SQL editor of the Gantt project:
-`select private.add_person('<id>', '<Name>');` and send them the link with the code it returns. Jesse and Matt (`people.admin`) manage this from **Team Access** in the chart's menu, so the SQL above is only a fallback:
-- New Link (`public.admin_new_link(id)`): replaces someone's link and signs them out; making your own signs you straight back in.
-- Remove / Give Access Back (`public.set_member_active(id, active)`): refuses to remove yourself and signs the removed person out.
-- Add A Team Member (`public.admin_add_person(name, initials)`): makes their id from the name, picks the first colour nobody uses, returns their link.
+`select private.add_person('<id>', '<Name>');` and send them the link with the code it returns. Jesse and Matt (`people.admin`) manage this in the chart itself, so the SQL above is only a fallback. Nobody else sees these:
+- **Add Member**, the last row of the Team category, opens a window for name, initials and role (Member or Admin)
+  (`public.admin_add_person(name, initials, admin)`; it makes their id from the name and picks the first colour nobody uses).
+  Adding the name of someone who was removed brings them back with a new link, keeping their tasks and colour.
+- **Remove Member** and **New Sign In Link** at the bottom of a person's panel (click their name in Team)
+  (`public.set_member_active(id, false)`, which refuses yourself and signs them out; `public.admin_new_link(id)`, which ends their old link
+  and, for your own, signs you straight back in).
 A link is shown once, with a Copy button; codes are only stored hashed. All three functions check the caller is an admin.
+The admin actions live in `GanttDB.admin` (`db.js`); the buttons and the Add Member window in `index.html` (`openMemberModal`, `memberRemove`, `memberNewLink`).
 
 The chart's team (name, initials, colour, order) comes from `public.people` (`loadTeam()` in `db.js`, `setTeam()` in `index.html`;
 the `TEAM` list in the page is only a fallback). Removed people stay in `TEAM` with `active:false` so their tasks keep their name,
