@@ -36,6 +36,14 @@ with sync_playwright() as p:
     check("bars drawn", pg.locator(".bar").count()>=4, pg.locator(".bar").count())
     check("title from settings", pg.inner_text("#title")=="S2 Launch Plan", pg.inner_text("#title"))
     check("signed-in name in menu", "Signed in as Jesse" in pg.inner_html("#morewrap .menu"))
+    # 2b. Team Access: remove asks to confirm, then calls the database; you can't remove yourself
+    pg.click('#morewrap > .btn'); pg.click('text=Team Access'); pg.wait_for_selector('.ta-list .btn')
+    check("team list shows others with Remove, not yourself", pg.locator('.ta-list .btn').count()==1 and "(You)" in pg.inner_text('.ta-list'))
+    pg.click('.ta-list .btn'); check("remove asks to confirm first", pg.evaluate("window.__rpc.length")==0 and "Remove Anna?" in pg.inner_text('.ta-list .btn'))
+    pg.click('.ta-list .btn'); pg.wait_for_timeout(200)
+    check("confirmed remove calls the database", pg.evaluate("JSON.stringify(window.__rpc)")=='[["set_member_active",{"p_id":"anna","p_active":false}]]')
+    check("removed person can be given access back", "Give Access Back" in pg.inner_text('.ta-list'))
+    pg.keyboard.press("Escape"); check("Escape closes Team Access", pg.locator('.ta-list').count()==0)
     # 3. a status click saves once, to the right document, and survives its own echo
     pg.click('.row.task[data-task="t1"] .status'); pg.wait_for_timeout(300)
     w=pg.evaluate("window.__writes"); check("status click saved", len(w)==1 and w[0]["collection"]=="tasks" and w[0]["id"]=="t1" and w[0]["data"]["status"]=="doing", json.dumps(w)[:200])

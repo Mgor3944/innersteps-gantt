@@ -161,7 +161,7 @@
   async function whoAmI(){
     const { data: s } = await sb.auth.getSession();
     if (!s || !s.session) return null;
-    const { data, error } = await sb.from("people").select("id,name").eq("user_id", s.session.user.id).maybeSingle();
+    const { data, error } = await sb.from("people").select("id,name,admin").eq("user_id", s.session.user.id).maybeSingle();
     if (error) throw error;
     return data || null;
   }
@@ -206,7 +206,61 @@
     out.setAttribute("role", "menuitem");
     out.innerHTML = `<span class="ms">logout</span>Sign Out`;
     out.addEventListener("click", async () => { ls.del(KEY_STORE); try { await sb.auth.signOut(); } catch(e){} location.reload(); });
-    menu.append(sep, who, out);
+    if (me.admin){
+      const team = document.createElement("button");
+      team.setAttribute("role", "menuitem");
+      team.innerHTML = `<span class="ms">group</span>Team Access`;
+      team.addEventListener("click", teamAccess);
+      menu.append(sep, team, who, out);
+    } else menu.append(sep, who, out);
+  }
+
+  /* Team Access (Jesse and Matt only): remove someone, or give them back access. The database checks who is asking. */
+  async function teamAccess(){
+    const wrap = document.createElement("div");
+    wrap.className = "scrim"; wrap.style.zIndex = "60";
+    wrap.innerHTML = `<div class="modal" role="dialog" aria-label="Team Access" style="width:min(440px,100%)">
+      <h2>Team Access</h2>
+      <p class="hint">Removing someone signs them out straight away. Their tasks stay on the plan, and you can give them access again any time.</p>
+      <div class="ta-list" style="display:flex;flex-direction:column;gap:6px"><p class="hint">Loading…</p></div>
+      <p class="hint ta-msg" style="color:var(--late-ink);min-height:1.2em;margin:0"></p>
+      <div style="display:flex;justify-content:flex-end"><button class="btn" data-close>Done</button></div>
+    </div>`;
+    document.body.appendChild(wrap);
+    const close = () => { wrap.remove(); document.removeEventListener("keydown", esc); };
+    const esc = ev => { if (ev.key === "Escape") close(); };
+    document.addEventListener("keydown", esc);
+    wrap.addEventListener("click", ev => { if (ev.target === wrap || ev.target.closest("[data-close]")) close(); });
+    const list = wrap.querySelector(".ta-list"), msg = wrap.querySelector(".ta-msg");
+    async function load(){
+      const { data, error } = await sb.from("people").select("id,name,active,admin").order("name");
+      if (error){ list.innerHTML = `<p class="hint">Couldn't load the team. Check your connection and try again.</p>`; return; }
+      list.innerHTML = "";
+      for (const p of data){
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)";
+        const name = document.createElement("span");
+        name.style.cssText = "flex:1;font-weight:600;" + (p.active ? "" : "color:var(--muted);text-decoration:line-through");
+        name.textContent = p.name + (p.id === me.id ? " (You)" : "");
+        row.append(name);
+        if (p.id !== me.id){
+          const b = document.createElement("button");
+          b.className = "btn" + (p.active ? " danger" : "");
+          b.style.height = "32px";
+          b.textContent = p.active ? "Remove" : "Give Access Back";
+          b.addEventListener("click", async () => {
+            if (p.active && !b.classList.contains("confirm")){ b.classList.add("confirm"); b.textContent = "Remove " + p.name + "?"; return; }
+            b.disabled = true; msg.textContent = "";
+            const { error: e } = await sb.rpc("set_member_active", { p_id: p.id, p_active: !p.active });
+            if (e){ msg.textContent = "Couldn't change that. " + (e.message || ""); b.disabled = false; return; }
+            load();
+          });
+          row.append(b);
+        }
+        list.append(row);
+      }
+    }
+    load();
   }
 
   async function connect(){

@@ -38,7 +38,8 @@ No passwords to remember. Each person has a personal link, `https://gantt.inners
 Opening it once signs that browser in and it stays signed in. Behind it is a Supabase Auth user `<id>@gantt.innersteps.org`
 whose password is the code. To add someone or replace a lost or leaked link, run in the SQL editor of the Gantt project:
 `select private.add_person('<id>', '<Name>');` and send them the link with the code it returns. `<Name>` must match the name in `TEAM` in `index.html`.
-To remove someone: `update public.people set active = false where id = '<id>';`
+Jesse and Matt (`people.admin`) can remove someone, or give them access back, from **Team Access** in the chart's menu
+(`public.set_member_active(id, active)`, which checks the caller is an admin, refuses to remove yourself and signs the removed person out).
 
 The sign-in screen (`gate()` in `db.js`, `.signin` / `.si-*` styles in `index.html`) is white to the window's edges, split in two: `public/img/signin.webp` fills the left box, pinned to its top left.
 That file is public, so anything in the picture can be seen by anyone who opens the site without signing in.

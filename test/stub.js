@@ -12,16 +12,17 @@
     {collection:"notes", id:"summary", data:{text:"Hello", updated:1}},
     {collection:"changelog", id:"log28", data:{at:1, date:today, text:"x"}}
   ];
+  window.__team = [{id:"anna",name:"Anna",active:true,admin:false},{id:"jesse",name:"Jesse",active:true,admin:true}]; window.__rpc = [];
   window.__rows = rows; window.__writes = []; window.__session = null; window.__member = true; window.__delay = 30;
   const wait = v => new Promise(r => setTimeout(() => r(v), window.__delay));
   function from(table){
     const q = {op:"select", f:{}};
     const b = {
-      select(){ return b; }, eq(k, v){ q.f[k] = v; return b; },
+      select(){ return b; }, order(){ return b; }, eq(k, v){ q.f[k] = v; return b; },
       upsert(row){ q.op = "upsert"; q.row = row; return b; }, delete(){ q.op = "delete"; return b; },
       maybeSingle(){ q.single = true; return b; },
       then(res, rej){ return wait().then(() => {
-        if (table === "people") return {data: window.__session && window.__member ? {id:"jesse", name:"Jesse"} : null, error:null};
+        if (table === "people"){ if (!(window.__session && window.__member)) return {data:null, error:null}; if (q.single) return {data:{id:"jesse", name:"Jesse", admin:window.__admin !== false}, error:null}; return {data: window.__team, error:null}; }
         if (!window.__session || !window.__member) return q.op === "select" ? {data:[], error:null} : {data:null, error:{code:"42501", message:"new row violates row-level security policy"}};
         if (q.op === "select") return {data: rows.map(r => ({...r})), error:null};
         window.__writes.push(q.op === "upsert" ? {op:"upsert", ...q.row} : {op:"delete", ...q.f});
@@ -40,6 +41,7 @@
       onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; }
     },
     from,
+    async rpc(fn, args){ window.__rpc.push([fn, args]); const p = window.__team.find(x => x.id === args.p_id); if (p) p.active = args.p_active; return {error:null}; },
     channel(){ const c = { on(_t, _f, cb){ window.__emit = cb; return c; }, subscribe(cb){ setTimeout(() => cb("SUBSCRIBED"), 10); return c; } }; return c; }
   }) };
 })();
